@@ -1,5 +1,4 @@
 import { createModule } from 'moducks'
-import { put } from 'redux-saga/effects'
 
 const initialState = {
   data: null,
@@ -11,7 +10,7 @@ const { reducer, sagas, load, loadSuccess, reset } = createModule('user', {
     reducer: (state) => ({ ...state, pending: true }),
     worker: function* () {
       const data = { name: 'john' } // api request
-      yield put(loadSuccess(data))
+      return loadSuccess(data)
     }
   },
   LOAD_SUCCESS: (state, { payload: data }) => ({ ...state, pending: false, data }),
