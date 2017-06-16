@@ -15,7 +15,7 @@ export const createModule = (moduleName, definitions, defaultState) => {
 
     creator ? actionMap[ACTION_TYPE] = creator : identityActions.push(ACTION_TYPE)
     reducer && reducerMap[ACTION_TYPE] = reducer
-    worker && sagas.push(takeEvery(ACTION_TYPE, worker))
+    worker && sagas.push(typeof worker === 'function' ? takeEvery(ACTION_TYPE, worker) : worker)
 
   }
 
