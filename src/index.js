@@ -14,7 +14,7 @@ export const createModule = (moduleName, definitions, defaultState) => {
     const { creator, reducer, saga } = typeof definition === 'function' ? { reducer: definition } : definition
 
     creator ? actionMap[ACTION_TYPE] = creator : identityActions.push(ACTION_TYPE)
-    reducerMap[ACTION_TYPE] = reducer
+    reducer && reducerMap[ACTION_TYPE] = reducer
     saga && sagas.push(takeEvery(ACTION_TYPE, saga))
 
   }
