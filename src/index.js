@@ -24,6 +24,6 @@ export const createModule = (moduleName, definitions, defaultState) => {
     ...sagas.length && { sagas },
     ...Object
       .entries(createActions(actionMap, ...identityActions))
-      .reduce((prev, [key, value]) => ({ ...prev, [key.split('/', 1)[1]]: value }), {}),
+      .reduce((prev, [key, value]) => ({ ...prev, [key.split('/', 2)[1]]: value }), {}),
   }
 }
