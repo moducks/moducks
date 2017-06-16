@@ -11,11 +11,11 @@ export const createModule = (moduleName, definitions, defaultState) => {
   for (const [type, definition] of Object.entries(definitions)) {
     
     const ACTION_TYPE = `${moduleName}/${type}`
-    const { creator, reducer, saga } = typeof definition === 'function' ? { reducer: definition } : definition
+    const { creator, reducer, worker } = typeof definition === 'function' ? { reducer: definition } : definition
 
     creator ? actionMap[ACTION_TYPE] = creator : identityActions.push(ACTION_TYPE)
     reducer && reducerMap[ACTION_TYPE] = reducer
-    saga && sagas.push(takeEvery(ACTION_TYPE, saga))
+    worker && sagas.push(takeEvery(ACTION_TYPE, worker))
 
   }
 

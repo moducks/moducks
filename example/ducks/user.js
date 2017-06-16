@@ -9,7 +9,7 @@ const initialState = {
 const { reducer, sagas, load, loadSuccess, reset } = createModule('user', {
   LOAD: {
     reducer: (state) => ({ ...state, pending: true }),
-    saga: function* () {
+    worker: function* () {
       const data = { name: 'john' } // api request
       yield put(loadSuccess(data))
     }
