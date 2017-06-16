@@ -1,0 +1,29 @@
+{
+  "name": "moducks",
+  "version": "0.0.5",
+  "main": "es/index.js",
+  "module": "es/index.js",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "babel --plugins transform-object-rest-spread src --out-dir es"
+  },
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exitinc/moducks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/exitinc/moducks/issues"
+  },
+  "homepage": "https://github.com/exitinc/moducks#readme",
+  "dependencies": {
+    "redux-actions": "^2.0.3",
+    "redux-saga": "^0.15.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0"
+  }
+}
