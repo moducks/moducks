@@ -13,7 +13,7 @@ const defaultOptions = {
 
 export const createModule = (
   moduleName,
-  definitions, 
+  definitions,
   defaultState
 ) => {
   const identityActions = []
@@ -51,9 +51,7 @@ export const createModule = (
               throw e
             }
 
-            const result = onError.constructor.name === 'GeneratorFunction'
-              ? (yield* onError(e))
-              : onError(e)
+            const result = isGeneratorFunction(obj) ? (yield* onError(e)) : onError(e)
             if (result !== undefined) {
               yield put(result)
             }
@@ -70,4 +68,14 @@ export const createModule = (
       .entries(createActions(actionMap, ...identityActions))
       .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${moduleName}/`.length)]: value }), {}),
   }
+}
+
+const isGenerator = obj => {
+  return 'function' == typeof obj.next && 'function' == typeof obj.throw
+}
+
+const isGeneratorFunction = obj => {
+  if (!obj.constructor) return false
+  if ('GeneratorFunction' === obj.constructor.name || 'GeneratorFunction' === obj.constructor.displayName) return true
+  return isGenerator(obj.constructor.prototype)
 }
