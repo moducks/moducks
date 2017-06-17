@@ -12,12 +12,12 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/exitinc/moducks.git"
+    "url": "git+https://github.com/moducks/moducks.git"
   },
   "bugs": {
-    "url": "https://github.com/exitinc/moducks/issues"
+    "url": "https://github.com/moducks/moducks/issues"
   },
-  "homepage": "https://github.com/exitinc/moducks#readme",
+  "homepage": "https://github.com/moducks/moducks#readme",
   "dependencies": {
     "redux-actions": "^2.0.3",
     "redux-saga": "^0.15.3"
