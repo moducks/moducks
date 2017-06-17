@@ -1,9 +1,8 @@
 {
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "npm -prefix ../ run build && webpack-dev-server"
   },
   "dependencies": {
-    "moducks": "^0.0.5",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-redux": "^5.0.5",

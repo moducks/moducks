@@ -4,7 +4,7 @@ import { Provider, connect } from 'react-redux'
 import getConfigureStore from './store'
 import * as reducers from './ducks'
 import * as sagas from './ducks/sagas'
-import { load, reset } from './ducks/user'
+import { load, reset, toggleThrowError } from './ducks/user'
 
 const preloadedState = undefined
 const configureStore = getConfigureStore(reducers, sagas)
@@ -14,12 +14,13 @@ store.runSaga()
 
 const App = connect(
   ({ user }) => ({ user }),
-  { load, reset }
-)(({ user, load, reset }) => {
+  { load, reset, toggleThrowError }
+)(({ user, load, reset, toggleThrowError }) => {
   return (
     <div>
       <button onClick={e => load()}>LOAD</button>
       <button onClick={e => reset()}>RESET</button>
+      <button onClick={e => toggleThrowError()}>TOGGLE_THROW_ERROR</button>
       <span>{JSON.stringify(user)}</span>
     </div>
   )
