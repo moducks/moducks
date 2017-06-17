@@ -7,9 +7,11 @@
     "prepublish": "npm run build",
     "build": "babel --plugins transform-object-rest-spread src --out-dir es"
   },
-  "author": "",
+  "author": "rzhx",
+  "contributors": ["mpyw <ryosuke_i_628@yahoo.co.jp>"],
   "license": "MIT",
-  "description": "",
+  "description": "Extreamely simple Ducks module provider for the stack Redux + Redux-Saga.",
+  "keywords": ["ducks", "redux-actions", "redux-saga", "redux", "react"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moducks/moducks.git"
