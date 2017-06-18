@@ -61,14 +61,14 @@ export default (state = initialState, { type, payload }) => {
     case LOAD_SUCCESS:
       return {
         ...state,
-        users: state.users.concat([payload.name]),
+        users: [ ...state.users, payload.name ],
         pendingCounts: state.pendingCounts - 1,
       }
 
     case LOAD_FAILURE:
       return {
         ...state,
-        errors: state.errors.concat([payload.message]),
+        errors: [ ...state.errors, payload.message ],
         pendingCounts: state.pendingCounts - 1,
       }
 
@@ -125,13 +125,13 @@ const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('
 
   LOAD_SUCCESS: (state, { payload: user }) => ({
     ...state,
-    users: state.users.concat([user.name]),
+    users: [ ...state.users, user.name ],
     pendingCounts: state.pendingCounts - 1,
   }),
 
   LOAD_FAILURE: (state, { payload: e }) => ({
     ...state,
-    errors: state.errors.concat([e.message]),
+    errors: [ ...state.errors, e.message ],
     pendingCounts: state.pendingCounts - 1,
   }),
 

@@ -40,13 +40,13 @@ const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('
 
   LOAD_SUCCESS: (state, { payload: user }) => ({
     ...state,
-    users: state.users.concat([user.name]),
+    users: [ ...state.users, user.name ],
     pendingCounts: state.pendingCounts - 1,
   }),
 
   LOAD_FAILURE: (state, { payload: e }) => ({
     ...state,
-    errors: state.errors.concat([e.message]),
+    errors: [ ...state.errors, e.message ],
     pendingCounts: state.pendingCounts - 1,
   }),
 
