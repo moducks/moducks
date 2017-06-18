@@ -49,7 +49,7 @@ export const createModule = (
 
     } else if (saga) {
 
-      throw new Error('Invalid saga: Saga must be specified as generator function or thunk that returns redux-saga FORK effect.')
+      throw new Error('Invalid saga: Saga must be specified as generator function or thunk that returns either redux-saga FORK effect or generator function.')
 
     }
 
