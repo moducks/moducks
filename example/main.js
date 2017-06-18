@@ -4,7 +4,8 @@ import { Provider, connect } from 'react-redux'
 import getConfigureStore from './store'
 import * as reducers from './ducks'
 import * as sagas from './ducks/sagas'
-import { load, reset, toggleThrowError } from './ducks/user'
+import { load, clear } from './ducks/randomUser'
+import JSONPretty from 'react-json-pretty'
 
 const preloadedState = undefined
 const configureStore = getConfigureStore(reducers, sagas)
@@ -13,15 +14,14 @@ const store = configureStore(preloadedState)
 store.runSaga()
 
 const App = connect(
-  ({ user }) => ({ user }),
-  { load, reset, toggleThrowError }
-)(({ user, load, reset, toggleThrowError }) => {
+  ({ randomUser }) => ({ randomUser }),
+  { load, clear }
+)(({ randomUser, errors, load, clear }) => {
   return (
     <div>
-      <button onClick={e => load()}>LOAD</button>
-      <button onClick={e => reset()}>RESET</button>
-      <button onClick={e => toggleThrowError()}>TOGGLE_THROW_ERROR</button>
-      <span>{JSON.stringify(user)}</span>
+      <button onClick={() => load()}>LOAD</button>
+      <button onClick={() => clear()}>CLEAR</button>
+      <JSONPretty json={randomUser} />
     </div>
   )
 })

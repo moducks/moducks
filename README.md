@@ -4,48 +4,96 @@ Extreamely simple [Ducks] module provider for the stack [Redux] + [Redux-Saga].
 
 ## Motivation
 
+Please consider the following fake API:
+
+```JavaScript
+import { delay } from 'redux-saga'
+
+export const fetchRandomUser = async () => {
+  await delay((0.3 + Math.random()) * 1000)
+  if (Math.random() < 0.2) {
+    // Sometimes it fails
+    const faces = ['xD', ':D', ':(']
+    throw new Error(`503 Service Unavailable ${faces[Math.floor(Math.random() * faces.length)]}`)
+  }
+  const users = [
+    { name: 'John' },
+    { name: 'Mary' },
+    { name: 'Bob' },
+    { name: 'Cathy' },
+    { name: 'Mike' },
+  ]
+  return users[Math.floor(Math.random() * users.length)]
+}
+```
+
 Without moducks, you have to define lengthy definitions for each modules.
 
 ```JavaScript
 import { put, call, takeEvery } from 'redux-saga/effects'
-import { fetchDataAsync } from './api'
+import { fetchRandomUser } from '../api'
 
-const LOAD = 'user/LOAD'
-const LOAD_SUCCESS = 'user/LOAD_SUCCESS'
-const LOAD_FAILURE = 'user/LOAD_FAILURE'
+const LOAD = 'randomUser/LOAD'
+const LOAD_SUCCESS = 'randomUser/LOAD_SUCCESS'
+const LOAD_FAILURE = 'randomUser/LOAD_FAILURE'
+const CLEAR = 'randomUser/CLEAR'
 
-export const load = (params) => ({ type: LOAD, payload: params })
+export const load = () => ({ type: LOAD })
 const loadSuccess = (data) => ({ type: LOAD_SUCCESS, payload: data })
-const loadFailure = (error) => ({ type: LOAD_FAILURE, payload: error })
+const loadFailure = (error) => ({ type: LOAD_FAILURE, payload: error, error: true })
+export const clear = () => ({ type: CLEAR })
 
 const initialState = {
-  data: null,
-  pending: false,
-  error: null,
+  users: [],
+  errors: [],
+  pendingCounts: 0,
 }
 
-export default reducer = (state = initialState, { type, payload }) => {
+export default (state = initialState, { type, payload }) => {
   switch (type) {
+
     case LOAD:
-      return { ...state, pending: true, error: null }
+      return {
+        ...state,
+        pendingCounts: state.pendingCounts + 1,
+      }
+
     case LOAD_SUCCESS:
-      return { data: payload, pending: false, error: null }
+      return {
+        ...state,
+        users: state.users.concat([payload.name]),
+        pendingCounts: state.pendingCounts - 1,
+      }
+
     case LOAD_FAILURE:
-      return { ...state, pending: false, error: payload }
+      return {
+        ...state,
+        errors: state.errors.concat([payload.message]),
+        pendingCounts: state.pendingCounts - 1,
+      }
+
+    case CLEAR:
+      return {
+        ...state,
+        users: [],
+        errors: [],
+      }
+
     default:
       return state
   }
 }
 
 export const sagas = [
-  takeEvery(LOAD, function* ({ payload: params }) {
+
+  takeEvery(LOAD, function* (action) {
     try {
-      const data = yield call(fetchDataAsync, params)
-      yield put(loadSuccess(data))
+      yield put(loadSuccess(yield call(fetchRandomUser)))
     } catch (e) {
       yield put(loadFailure(e))
     }
   }),
+
 ]
 ```
 
@@ -54,29 +102,50 @@ With moducks, module definitions will be extreamly simple. The following stateme
 ```JavaScript
 import { createModule } from 'moducks'
 import { call } from 'redux-saga/effects'
-import { fetchDataAsync } from './api'
+import { fetchRandomUser } from '../api'
 
 const initialState = {
-  data: null,
-  pending: false,
-  error: null,
+  users: [],
+  errors: [],
+  pendingCounts: 0,
 }
 
-const { reducer, sagas, load, loadSuccess, loadFailure } = createModule('user', {
+const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('randomUser', {
+
   LOAD: {
-    reducer: (state) => ({ ...state, pending: true, error: null }),
-    saga: function* ({ payload: params }) {
-      const data = yield call(fetchDataAsync, params)
-      return loadSuccess(data)
+    reducer: (state) => ({
+      ...state,
+      pendingCounts: state.pendingCounts + 1,
+    }),
+    saga: function* (action) {
+      return loadSuccess(yield call(fetchRandomUser))
     },
-    onError: loadFailure,
+    onError: (e) => loadFailure(e),
   },
-  LOAD_SUCCESS: (state, { payload: data }) => ({ data, pending: false, error: null }),
-  LOAD_FAILURE: (state, { payload: error }) => ({ ...state, pending: false, error }),
+
+  LOAD_SUCCESS: (state, { payload: user }) => ({
+    ...state,
+    users: state.users.concat([user.name]),
+    pendingCounts: state.pendingCounts - 1,
+  }),
+
+  LOAD_FAILURE: (state, { payload: e }) => ({
+    ...state,
+    errors: state.errors.concat([e.message]),
+    pendingCounts: state.pendingCounts - 1,
+  }),
+
+  CLEAR: (state) => ({
+    ...state,
+    users: [],
+    errors: []
+  }),
+
 }, initialState)
 
 export default reducer
-export { sagas, load }
+export { sagas }
+export { load, clear }
 ```
 
 ## Installing

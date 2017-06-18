@@ -1,1 +1,1 @@
-export { sagas as user } from './user'
+export { sagas as randomUser } from './randomUser'
