@@ -51,7 +51,7 @@ export const createModule = (
               throw e
             }
 
-            const result = isGeneratorFunction(obj) ? (yield* onError(e)) : onError(e)
+            const result = isGeneratorFunction(onError) ? (yield* onError(e)) : onError(e)
             if (result !== undefined) {
               yield put(result)
             }
