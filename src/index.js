@@ -22,7 +22,7 @@ export const createModule = (
       onError,
     } = typeof definition === 'function' ? { reducer: definition } : definition
 
-    creator ? actionMap[actionType] = creator : identityActions.push(actionType)
+    creator ? (actionMap[actionType] = creator) : identityActions.push(actionType)
     reducer && (reducerMap[actionType] = reducer)
 
     if (isGeneratorFunction(saga)) {
