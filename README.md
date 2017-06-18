@@ -10,7 +10,7 @@ Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga
 
 Please consider the following fake API:
 
-```JavaScript
+```javascript
 import { delay } from 'redux-saga'
 
 export const fetchRandomUser = async () => {
@@ -33,7 +33,7 @@ export const fetchRandomUser = async () => {
 
 Without moducks, you have to define lengthy definition for each module.
 
-```JavaScript
+```javascript
 import { put, call, takeEvery } from 'redux-saga/effects'
 import { fetchRandomUser } from '../api'
 
@@ -103,7 +103,7 @@ export const sagas = [
 
 With moducks, module definition will be extremely simple. The following snippet is equivalent to the above.
 
-```JavaScript
+```javascript
 import { createModule } from 'moducks'
 import { call } from 'redux-saga/effects'
 import { fetchRandomUser } from '../api'
