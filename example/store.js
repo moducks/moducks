@@ -1,13 +1,14 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux'
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 
 export default (reducers, sagas) => function configureStore(preloadedState) {
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
   const sagaMiddleware = createSagaMiddleware()
 
   const store = createStore(
     combineReducers(reducers),
     preloadedState,
-    applyMiddleware(sagaMiddleware),
+    composeEnhancers(applyMiddleware(sagaMiddleware)),
   )
 
   return {
