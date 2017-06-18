@@ -15,7 +15,7 @@ store.runSaga()
 
 const App = connect(
   ({ randomUser }) => ({ randomUser }),
-  { load, clear }
+  { load, clear },
 )(({ randomUser, errors, load, clear }) => {
   return (
     <div>
@@ -30,5 +30,5 @@ render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.getElementById('root')
+  document.getElementById('root'),
 )

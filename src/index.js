@@ -3,18 +3,18 @@ import { takeEvery, takeLatest, put } from 'redux-saga/effects'
 
 const helpers = {
   takeEvery,
-  takeLatest
+  takeLatest,
 }
 
 const defaultOptions = {
   useHelper: true,
-  helper: 'takeEvery'
+  helper: 'takeEvery',
 }
 
 export const createModule = (
   moduleName,
   definitions,
-  defaultState
+  defaultState,
 ) => {
   const identityActions = []
   const actionMap = {}
@@ -31,7 +31,7 @@ export const createModule = (
       options: {
         helper = defaultOptions.helper,
         useHelper = defaultOptions.useHelper,
-      } = defaultOptions
+      } = defaultOptions,
     } = typeof definition === 'function' ? { reducer: definition } : definition
 
     creator ? actionMap[actionType] = creator : identityActions.push(actionType)

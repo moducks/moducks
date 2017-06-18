@@ -138,7 +138,7 @@ const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('
   CLEAR: (state) => ({
     ...state,
     users: [],
-    errors: []
+    errors: [],
   }),
 
 }, initialState)

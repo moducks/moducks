@@ -1,10 +1,11 @@
-var path = require("path");
+var path = require('path')
+
 module.exports = {
-  entry: ["babel-polyfill", "./main.js"],
+  entry: ['babel-polyfill', './main.js'],
   output: {
-    path: path.resolve(__dirname, "build"),
-    publicPath: "/assets/",
-    filename: "bundle.js"
+    path: path.resolve(__dirname, 'build'),
+    publicPath: '/assets/',
+    filename: 'bundle.js'
   },
   module: {
     rules: [
@@ -21,4 +22,4 @@ module.exports = {
       }
     ]
   }
-};
+}
