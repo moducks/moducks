@@ -1,6 +1,6 @@
 {
   "name": "moducks",
-  "version": "0.0.5",
+  "version": "0.0.9",
   "main": "es/index.js",
   "module": "es/index.js",
   "scripts": {
@@ -8,10 +8,18 @@
     "build": "babel --plugins transform-object-rest-spread src --out-dir es"
   },
   "author": "rzhx",
-  "contributors": ["mpyw <ryosuke_i_628@yahoo.co.jp>"],
+  "contributors": [
+    "mpyw <ryosuke_i_628@yahoo.co.jp>"
+  ],
   "license": "MIT",
   "description": "Extreamely simple Ducks module provider for the stack of Redux + Redux-Saga.",
-  "keywords": ["ducks", "redux-actions", "redux-saga", "redux", "react"],
+  "keywords": [
+    "ducks",
+    "redux-actions",
+    "redux-saga",
+    "redux",
+    "react"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/moducks/moducks.git"
