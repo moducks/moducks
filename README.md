@@ -1,4 +1,8 @@
-# ![Moducks](https://github.com/moducks/moducks/blob/master/logos/logo.png?raw=true)
+<img src='https://github.com/moducks/moducks/blob/master/logos/logo.png?raw=true' alt='Moducks'>
+
+# moducks
+
+[![npm version](https://badge.fury.io/js/moducks.svg)](https://badge.fury.io/js/moducks)
 
 Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga].
 
