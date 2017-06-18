@@ -10,7 +10,7 @@
   "author": "rzhx",
   "contributors": ["mpyw <ryosuke_i_628@yahoo.co.jp>"],
   "license": "MIT",
-  "description": "Extreamely simple Ducks module provider for the stack Redux + Redux-Saga.",
+  "description": "Extreamely simple Ducks module provider for the stack of Redux + Redux-Saga.",
   "keywords": ["ducks", "redux-actions", "redux-saga", "redux", "react"],
   "repository": {
     "type": "git",

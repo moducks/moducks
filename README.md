@@ -1,6 +1,6 @@
 # ![Moducks](https://github.com/moducks/moducks/blob/master/logos/logo.png?raw=true)
 
-Extreamely simple [Ducks] module provider for the stack [Redux] + [Redux-Saga].
+Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga].
 
 ## Motivation
 
@@ -27,7 +27,7 @@ export const fetchRandomUser = async () => {
 }
 ```
 
-Without moducks, you have to define lengthy definitions for each modules.
+Without moducks, you have to define lengthy definition for each module.
 
 ```JavaScript
 import { put, call, takeEvery } from 'redux-saga/effects'
@@ -97,7 +97,7 @@ export const sagas = [
 ]
 ```
 
-With moducks, module definitions will be extreamly simple. The following statement is equivalent to the above.
+With moducks, module definition will be extremely simple. The following snippet is equivalent to the above.
 
 ```JavaScript
 import { createModule } from 'moducks'
