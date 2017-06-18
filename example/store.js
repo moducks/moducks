@@ -13,7 +13,9 @@ export default (reducers, sagas) => function configureStore(preloadedState) {
 
   return {
     ...store,
-    runSaga: () => sagaMiddleware.run(function* () { yield Object.values(sagas) }),
+    runSaga: () => sagaMiddleware.run(function* () {
+      yield Object.values(sagas).reduce((prev, sagas) => [ ...prev, ...Object.values(sagas) ], [])
+    }),
   }
 }
 

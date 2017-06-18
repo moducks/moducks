@@ -88,9 +88,9 @@ export default (state = initialState, { type, payload }) => {
   }
 }
 
-export const sagas = [
+export const sagas = {
 
-  takeEvery(LOAD, function* (action) {
+  LOAD: takeEvery(LOAD, function* (action) {
     try {
       yield put(loadSuccess(yield call(fetchRandomUser)))
     } catch (e) {
@@ -98,7 +98,7 @@ export const sagas = [
     }
   }),
 
-]
+}
 ```
 
 With moducks, module definition will be extremely simple. The following snippet is equivalent to the above.

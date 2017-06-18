@@ -10,7 +10,7 @@ export const createModule = (
   const identityActions = []
   const actionMap = {}
   const reducerMap = {}
-  const sagas = []
+  const sagas = {}
 
   for (const [type, definition] of Object.entries(definitions)) {
 
@@ -27,7 +27,7 @@ export const createModule = (
 
     if (isGeneratorFunction(saga)) {
 
-      sagas.push(takeEvery(actionType, enhanceThunk(onError)(saga)))
+      sagas[type] = takeEvery(actionType, enhanceThunk(onError)(saga))
 
     } else if (isNormalFunction(saga)) {
 
@@ -40,9 +40,9 @@ export const createModule = (
         enhance,
       })
       if (isGeneratorFunction(returnValue)) {
-        sagas.push(fork(returnValue))
+        sagas[type] = fork(returnValue)
       } else if (isForkEffect(returnValue)) {
-        sagas.push(returnValue)
+        sagas[type] = returnValue
       } else {
         throw new Error('Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
       }
@@ -57,7 +57,7 @@ export const createModule = (
 
   return {
     reducer: handleActions(reducerMap, defaultState),
-    ...sagas.length && { sagas },
+    ...Object.keys(sagas).length && { sagas },
     ...Object
       .entries(createActions(actionMap, ...identityActions))
       .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${moduleName}/`.length)]: value }), {}),
