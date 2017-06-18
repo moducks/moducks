@@ -67,6 +67,9 @@ export const createModule = (
     ...Object
       .entries(createActions(actionMap, ...identityActions))
       .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${moduleName}/`.length)]: value }), {}),
+    ...Object
+      .keys(definitions)
+      .reduce((prev, key) => ({ ...prev, [key]: `${moduleName}/${key}` }), {})
   }
 }
 
