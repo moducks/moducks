@@ -1,72 +1,6 @@
 import { createActions, handleActions } from 'redux-actions'
 import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/effects'
 
-export const createModule = (
-  moduleName,
-  definitions,
-  defaultState,
-) => {
-
-  const identityActions = []
-  const actionMap = {}
-  const reducerMap = {}
-  const sagas = {}
-
-  for (const [type, definition] of Object.entries(definitions)) {
-
-    const actionType = `${moduleName}/${type}`
-    const {
-      creator,
-      reducer,
-      saga,
-      onError,
-    } = typeof definition === 'function' ? { reducer: definition } : definition
-
-    creator ? (actionMap[actionType] = creator) : identityActions.push(actionType)
-    reducer && (reducerMap[actionType] = reducer)
-
-    if (isGeneratorFunction(saga)) {
-
-      sagas[type] = takeEvery(actionType, enhanceThunk(onError)(saga))
-
-    } else if (isNormalFunction(saga)) {
-
-      const enhance = enhanceThunk(onError)
-      const returnValue = saga({
-        TYPE: actionType,
-        ...Object
-          .entries(enhancibleForkEffectThunks)
-          .reduce((prev, [key, value]) => ({ ...prev, [key]: value(enhance) }), {}),
-        enhance,
-      })
-      if (isGeneratorFunction(returnValue)) {
-        sagas[type] = fork(returnValue)
-      } else if (isForkEffect(returnValue)) {
-        sagas[type] = returnValue
-      } else {
-        throw new Error('Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
-      }
-
-    } else if (saga) {
-
-      throw new Error('Invalid saga: Saga must be specified as generator function or thunk that returns either redux-saga FORK effect or generator function.')
-
-    }
-
-  }
-
-  return {
-    reducer: handleActions(reducerMap, defaultState),
-    ...Object.keys(sagas).length && { sagas },
-    ...Object
-      .entries(createActions(actionMap, ...identityActions))
-      .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${moduleName}/`.length)]: value }), {}),
-    ...Object
-      .keys(definitions)
-      .reduce((prev, key) => ({ ...prev, [key]: `${moduleName}/${key}` }), {})
-  }
-}
-
 const isGenerator = obj => {
   return obj && 'function' == typeof obj.next && 'function' == typeof obj.throw
 }
@@ -113,3 +47,70 @@ const enhanceThunk = onError => saga => function* (...args) {
     }
   }
 }
+
+export const createModule = (
+  moduleName,
+  definitions,
+  defaultState,
+) => {
+
+  const identityActions = []
+  const actionMap = {}
+  const reducerMap = {}
+  const sagas = {}
+
+  for (const [type, definition] of Object.entries(definitions)) {
+
+    const actionType = `${moduleName}/${type}`
+    const {
+      creator,
+      reducer,
+      saga,
+      onError,
+    } = typeof definition === 'function' ? { reducer: definition } : definition
+
+    creator ? (actionMap[actionType] = creator) : identityActions.push(actionType)
+    reducer && (reducerMap[actionType] = reducer)
+
+    if (isGeneratorFunction(saga)) {
+
+      sagas[type] = takeEvery(actionType, enhanceThunk(onError)(saga))
+
+    } else if (isNormalFunction(saga)) {
+
+      const enhance = enhanceThunk(onError)
+      const returnValue = saga({
+        type: actionType,
+        ...Object
+          .entries(enhancibleForkEffectThunks)
+          .reduce((prev, [key, value]) => ({ ...prev, [key]: value(enhance) }), {}),
+        enhance,
+      })
+      if (isGeneratorFunction(returnValue)) {
+        sagas[type] = fork(returnValue)
+      } else if (isForkEffect(returnValue)) {
+        sagas[type] = returnValue
+      } else {
+        throw new Error('Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
+      }
+
+    } else if (saga) {
+
+      throw new Error('Invalid saga: Saga must be specified as generator function or thunk that returns either redux-saga FORK effect or generator function.')
+
+    }
+
+  }
+
+  return {
+    [moduleName]: handleActions(reducerMap, defaultState),
+    ...Object.keys(sagas).length && { sagas },
+    ...Object
+      .entries(createActions(actionMap, ...identityActions))
+      .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${moduleName}/`.length)]: value }), {}),
+    ...Object
+      .keys(definitions)
+      .reduce((prev, key) => ({ ...prev, [key]: `${moduleName}/${key}` }), {})
+  }
+}
+

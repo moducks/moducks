@@ -1,1 +1,1 @@
-export { default as randomUser } from './randomUser'
+export { randomUser } from './randomUser'

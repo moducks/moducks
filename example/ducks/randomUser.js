@@ -25,7 +25,14 @@ const fetchRandomUser = async () => {
   return users[Math.floor(Math.random() * users.length)]
 }
 
-const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('randomUser', {
+export const {
+  randomUser,
+  sagas,
+  load,
+  loadSuccess,
+  loadFailure,
+  clear
+} = createModule('randomUser', {
 
   LOAD: {
     reducer: (state) => ({
@@ -58,6 +65,3 @@ const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('
 
 }, initialState)
 
-export default reducer
-export { sagas }
-export { load, clear }
