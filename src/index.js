@@ -121,3 +121,22 @@ const createModuleWithApp = (
 export const createModule = (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState)
 
 export const createApp = appName => (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState, appName)
+
+export const flattenSagas = (...sagas) => {
+
+  const storage = []
+  const stack = sagas
+
+  while (stack.length) {
+    const item = stack.shift()
+    if (Array.isArray(item)) {
+      stack.unshift(...item)
+    } else if (item && item['@@redux-saga/IO']) {
+      storage.push(item)
+    } else if (item) {
+      stack.unshift(...Object.values(item))
+    }
+  }
+
+  return storage
+}

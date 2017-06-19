@@ -1,4 +1,5 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
+import { flattenSagas } from '../es'
 import createSagaMiddleware from 'redux-saga'
 
 export default (reducers, sagas) => function configureStore(preloadedState) {
@@ -14,7 +15,7 @@ export default (reducers, sagas) => function configureStore(preloadedState) {
   return {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
-      yield Object.values(sagas).reduce((prev, sagas) => [ ...prev, ...Object.values(sagas) ], [])
+      yield flattenSagas(sagas)
     }),
   }
 }
