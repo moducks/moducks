@@ -129,13 +129,9 @@ export const flattenSagas = (...sagas) => {
 
   while (stack.length) {
     const item = stack.shift()
-    if (Array.isArray(item)) {
-      stack.unshift(...item)
-    } else if (item && item['@@redux-saga/IO']) {
-      storage.push(item)
-    } else if (item) {
-      stack.unshift(...Object.values(item))
-    }
+    if (typeof item !== 'object' || item === null) continue
+    if (item && item['@@redux-saga/IO']) storage.push(item)
+    stack.unshift(...Object.values(item))
   }
 
   return storage
