@@ -114,7 +114,7 @@ const initialState = {
   pendingCounts: 0,
 }
 
-const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('randomUser', {
+const { randomUser, sagas, load, loadSuccess, loadFailure, clear } = createModule('randomUser', {
 
   LOAD: {
     reducer: (state) => ({
@@ -147,7 +147,7 @@ const { reducer, sagas, load, loadSuccess, loadFailure, clear } = createModule('
 
 }, initialState)
 
-export default reducer
+export default randomUser
 export { sagas }
 export { load, clear }
 ```
