@@ -29,6 +29,11 @@ test('it should flatten nested objects and arrays into a flat array of redux-sag
         h: expected[3],
       },
       'bar',
+      null,
+      undefined,
+      0,
+      Symbol('baz'),
+      x => 1,
       {
         i: [
           expected[4],
