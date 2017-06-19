@@ -5,7 +5,8 @@
   "module": "es/index.js",
   "scripts": {
     "prepublish": "npm run build",
-    "build": "babel --plugins transform-object-rest-spread src --out-dir es"
+    "build": "babel --plugins transform-object-rest-spread src --out-dir es",
+    "test": "babel-node --plugins transform-object-rest-spread test/index.js | tap-spec"
   },
   "author": "rzhx",
   "contributors": [
@@ -34,6 +35,8 @@
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0"
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.3"
   }
 }
