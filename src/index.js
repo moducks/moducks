@@ -1,4 +1,5 @@
 import { createActions, handleActions } from 'redux-actions'
+import camelCase from 'redux-actions/lib/camelCase'
 import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/effects'
 
 const isGenerator = obj => {
@@ -48,12 +49,14 @@ const enhanceThunk = onError => saga => function* (...args) {
   }
 }
 
-export const createModule = (
+const createModuleWithApp = (
   moduleName,
   definitions,
   defaultState,
+  appName,
 ) => {
 
+  const prefix = appName ? `${appName}/` : ''
   const identityActions = []
   const actionMap = {}
   const reducerMap = {}
@@ -61,7 +64,7 @@ export const createModule = (
 
   for (const [type, definition] of Object.entries(definitions)) {
 
-    const actionType = `${moduleName}/${type}`
+    const actionType = `${prefix}${moduleName}/${type}`
     const {
       creator,
       reducer,
@@ -107,10 +110,13 @@ export const createModule = (
     ...Object.keys(sagas).length && { sagas },
     ...Object
       .entries(createActions(actionMap, ...identityActions))
-      .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${moduleName}/`.length)]: value }), {}),
+      .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${prefix}${moduleName}/`.length)]: value }), {}),
     ...Object
       .keys(definitions)
-      .reduce((prev, key) => ({ ...prev, [key]: `${moduleName}/${key}` }), {})
+      .reduce((prev, key) => ({ ...prev, [key]: `${prefix}${moduleName}/${key}` }), {})
   }
 }
 
+export const createModule = (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState)
+
+export const createApp = appName => (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState, appName)
