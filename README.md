@@ -90,7 +90,7 @@ export default (state = initialState, { type, payload }) => {
 
 export const sagas = {
 
-  LOAD: takeEvery(LOAD, function* (action) {
+  load: takeEvery(LOAD, function* (action) {
     try {
       yield put(loadSuccess(yield call(fetchRandomUser)))
     } catch (e) {

@@ -65,6 +65,7 @@ const createModuleWithApp = (
   for (const [type, definition] of Object.entries(definitions)) {
 
     const actionType = `${prefix}${moduleName}/${type}`
+    const camelType = camelCase(type)
     const {
       creator,
       reducer,
@@ -77,7 +78,7 @@ const createModuleWithApp = (
 
     if (isGeneratorFunction(saga)) {
 
-      sagas[type] = takeEvery(actionType, enhanceThunk(onError)(saga))
+      sagas[camelType] = takeEvery(actionType, enhanceThunk(onError)(saga))
 
     } else if (isNormalFunction(saga)) {
 
@@ -90,9 +91,9 @@ const createModuleWithApp = (
         enhance,
       })
       if (isGeneratorFunction(returnValue)) {
-        sagas[type] = fork(returnValue)
+        sagas[camelType] = fork(returnValue)
       } else if (isForkEffect(returnValue)) {
-        sagas[type] = returnValue
+        sagas[camelType] = returnValue
       } else {
         throw new Error('Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
       }
