@@ -108,7 +108,7 @@ const createModuleWithApp = (
 
   return {
     [moduleName]: handleActions(reducerMap, defaultState),
-    ...Object.keys(sagas).length && { sagas },
+    ...Object.keys(sagas).length ? { sagas } : {},
     ...Object
       .entries(createActions(actionMap, ...identityActions))
       .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${prefix}${moduleName}/`.length)]: value }), {}),
