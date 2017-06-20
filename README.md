@@ -3,6 +3,7 @@
 # moducks
 
 [![npm version](https://badge.fury.io/js/moducks.svg)](https://badge.fury.io/js/moducks)
+[![Build Status](https://travis-ci.org/moducks/moducks.svg?branch=master)](https://travis-ci.org/moducks/moducks)
 
 Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga].
 
