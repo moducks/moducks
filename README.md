@@ -7,6 +7,20 @@
 
 Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga].
 
+## Getting Started
+
+### Installing
+
+```Bash
+npm install moducks --save
+```
+
+### Contents
+
+- [Example](./example)
+- [Documentation](./docs)
+- [View source](./src)
+
 ## Motivation
 
 Please consider the following fake API:
@@ -153,15 +167,8 @@ export { sagas }
 export { load, clear }
 ```
 
-## Installing
-
-```Bash
-npm install moducks --save
-```
-
 ## Todos
 
-- Documentation
 - Tests
 - Contributing guides
 
