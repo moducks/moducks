@@ -213,14 +213,14 @@ const requestFailure = payload => ({ type: 'myClient/REQUEST_FAILURE', payload }
 
 ### Return Value
 
-An object like:
+If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BAR`, the object will be:
 
 ```js
 {
-  <moduleName>,
+  myClient,
   sagas,
-  <actionCreator 1>, <actionCreator 2>, ...,
-  <ACTION 1>, <ACTION 2>, ...,
+  actionFoo, actionBar,
+  ACTION_FOO, ACTION_BAR,
 }
 ```
 
