@@ -1,11 +1,11 @@
-<img src='https://github.com/moducks/moducks/blob/master/logos/logo.png?raw=true' alt='Moducks'>
+<img src="https://github.com/moducks/moducks/blob/master/logos/logo.png?raw=true" alt="Moducks">
 
 # moducks
 
 [![npm version](https://badge.fury.io/js/moducks.svg)](https://badge.fury.io/js/moducks)
 [![Build Status](https://travis-ci.org/moducks/moducks.svg?branch=master)](https://travis-ci.org/moducks/moducks)
 
-Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga].
+[Ducks] ([Redux] Reducer Bundles) + [Redux-Saga] = **Moducks**
 
 **WARNING: The project is still under development! There are no stable releases!**
 
@@ -21,7 +21,8 @@ npm install moducks --save
 
 - [Example](./example)
 - [Documentation](./docs)
-- [View source](./src)
+- [Source](./src)
+- [Test](./test)
 
 ## Motivation
 
@@ -48,7 +49,7 @@ export const fetchRandomUser = async () => {
 }
 ```
 
-Without moducks, you have to define lengthy definition for each module.
+Without moducks, you have to define lengthy definitions for each module.
 
 ```javascript
 import { put, call, takeEvery } from 'redux-saga/effects'
@@ -167,11 +168,6 @@ const { randomUser, sagas, load, loadSuccess, loadFailure, clear } = createModul
 export default randomUser
 export { sagas, load, clear }
 ```
-
-## Todos
-
-- Tests
-- Contributing guides
 
 [Ducks]: https://github.com/erikras/ducks-modular-redux
 [Redux]: https://github.com/reactjs/redux

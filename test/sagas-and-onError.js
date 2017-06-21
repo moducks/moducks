@@ -28,7 +28,7 @@ async function callApiAsync(payload) {
   }
 }
 
-test('[Sagas and onError] it should automatically wrapepd by enhanced takeEvery', assert => {
+test('[Sagas and onError] it should automatically wrapped by enhanced takeEvery', assert => {
   assert.plan(1)
 
   const events = []

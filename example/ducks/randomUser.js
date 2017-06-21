@@ -31,7 +31,7 @@ export const {
   load,
   loadSuccess,
   loadFailure,
-  clear
+  clear,
 } = createModule('randomUser', {
 
   LOAD: {

@@ -5,7 +5,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     publicPath: '/assets/',
-    filename: 'bundle.js'
+    filename: 'bundle.js',
   },
   module: {
     rules: [
@@ -16,10 +16,10 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['react'],
-            plugins: ['transform-object-rest-spread']
-          }
-        }
-      }
-    ]
-  }
+            plugins: ['transform-object-rest-spread'],
+          },
+        },
+      },
+    ],
+  },
 }

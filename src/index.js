@@ -3,16 +3,16 @@ import camelCase from 'redux-actions/lib/camelCase'
 import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/effects'
 
 const isGenerator = obj => {
-  return obj && 'function' == typeof obj.next && 'function' == typeof obj.throw
+  return obj && typeof obj.next === 'function' && typeof obj.throw === 'function'
 }
 const isGeneratorFunction = obj => {
   if (!obj || !obj.constructor) return false
-  if ('GeneratorFunction' === obj.constructor.name || 'GeneratorFunction' === obj.constructor.displayName) return true
+  if (obj.constructor.name === 'GeneratorFunction' || obj.constructor.displayName === 'GeneratorFunction') return true
   return isGenerator(obj.constructor.prototype)
 }
 const isNormalFunction = obj => {
   if (!obj || !obj.constructor) return false
-  return 'Function' === obj.constructor.name || 'Function' === obj.constructor.displayName
+  return obj.constructor.name === 'Function' || obj.constructor.displayName === 'Function'
 }
 const isForkEffect = obj => {
   return obj && obj['@@redux-saga/IO'] && obj['FORK']

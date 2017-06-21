@@ -19,4 +19,3 @@ export default (reducers, sagas) => function configureStore(preloadedState) {
     }),
   }
 }
-
