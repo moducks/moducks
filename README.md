@@ -19,7 +19,7 @@ npm install moducks --save
 
 ### Contents
 
-- [Example](./example)
+- [Examples](./examples)
 - [Documentation](./docs)
 - [Source](./src)
 - [Test](./test)
