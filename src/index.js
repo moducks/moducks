@@ -5,30 +5,26 @@ import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/ef
 const isGenerator = obj => {
   return obj && 'function' == typeof obj.next && 'function' == typeof obj.throw
 }
-
 const isGeneratorFunction = obj => {
   if (!obj || !obj.constructor) return false
   if ('GeneratorFunction' === obj.constructor.name || 'GeneratorFunction' === obj.constructor.displayName) return true
   return isGenerator(obj.constructor.prototype)
 }
-
 const isNormalFunction = obj => {
   if (!obj || !obj.constructor) return false
   return 'Function' === obj.constructor.name || 'Function' === obj.constructor.displayName
 }
-
 const isForkEffect = obj => {
   return obj && obj['@@redux-saga/IO'] && obj['FORK']
 }
 
-const enhancibleForkEffectThunks = {
+const enhancibleForkerThunks = {
   takeEvery: enhance => (patternOrChannel, worker, ...args) => takeEvery(patternOrChannel, enhance(worker), ...args),
   takeLatest: enhance => (patternOrChannel, worker, ...args) => takeLatest(patternOrChannel, enhance(worker), ...args),
   throttle: enhance => (ms, pattern, worker, ...args) => throttle(ms, pattern, enhance(worker), ...args),
   fork: enhance => (fn, ...args) => fork(enhance(fn), ...args),
   spawn: enhance => (fn, ...args) => spawn(enhance(fn), ...args),
 }
-
 const enhanceThunk = onError => saga => function* (...args) {
   if (!isGeneratorFunction(saga)) {
     throw new Error('Enhanced target must be generator function.')
@@ -86,7 +82,7 @@ const createModuleWithApp = (
       const returnValue = saga({
         type: actionType,
         ...Object
-          .entries(enhancibleForkEffectThunks)
+          .entries(enhancibleForkerThunks)
           .reduce((prev, [key, value]) => ({ ...prev, [key]: value(enhance) }), {}),
         enhance,
       })
@@ -119,7 +115,6 @@ const createModuleWithApp = (
 }
 
 export const createModule = (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState)
-
 export const createApp = appName => (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState, appName)
 
 export const flattenSagas = (...sagas) => {
