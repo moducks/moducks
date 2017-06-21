@@ -42,7 +42,7 @@ const enhanceThunk = onError => saga => function* (...args) {
     if (!onError) {
       throw e
     }
-    const result = isGeneratorFunction(onError) ? (yield* onError(e)) : onError(e)
+    const result = isGeneratorFunction(onError) ? (yield* onError(e, ...args)) : onError(e, ...args)
     if (result !== undefined) {
       yield put(result)
     }
