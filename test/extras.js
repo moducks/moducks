@@ -1,6 +1,6 @@
 import test from 'tape'
 import { takeEvery, takeLatest, throttle, fork, spawn } from 'redux-saga/effects'
-import { flattenSagas } from '../src'
+import { flattenSagas, createApp } from '../src'
 
 test('[Extras] it should flatten nested objects and arrays into a flat array of redux-saga effects', assert => {
 
@@ -43,5 +43,16 @@ test('[Extras] it should flatten nested objects and arrays into a flat array of 
   )
 
   assert.deepEqual(actual, expected)
+  assert.end()
+})
+
+test('[Extras] it pre-prefix module names', assert => {
+
+  const createMyAppModule = createApp('@@myApp')
+  const { fooAction } = createMyAppModule('fooModule', { FOO_ACTION: {} })
+  const { barAction } = createMyAppModule('barModule', { BAR_ACTION: {} })
+
+  assert.deepEqual(fooAction(), { type: '@@myApp/fooModule/FOO_ACTION' })
+  assert.deepEqual(barAction(), { type: '@@myApp/barModule/BAR_ACTION' })
   assert.end()
 })

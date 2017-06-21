@@ -37,6 +37,7 @@
     "babel-cli": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-preset-env": "^1.5.2",
+    "redux": "^3.7.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3"
   }
