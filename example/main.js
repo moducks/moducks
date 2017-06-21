@@ -2,9 +2,9 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider, connect } from 'react-redux'
 import getConfigureStore from './store'
-import * as reducers from './ducks'
-import * as sagas from './ducks/sagas'
-import { load, clear } from './ducks/randomUser'
+import * as reducers from './moducks'
+import * as sagas from './moducks/sagas'
+import { load, clear } from './moducks/randomUser'
 import JSONPretty from 'react-json-pretty'
 
 const preloadedState = undefined
