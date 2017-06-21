@@ -42,7 +42,7 @@ export const {
     saga: function* (action) {
       return loadSuccess(yield call(fetchRandomUser))
     },
-    onError: (e) => loadFailure(e),
+    onError: (e, action) => loadFailure(e),
   },
 
   LOAD_SUCCESS: (state, { payload: user }) => ({
@@ -64,4 +64,3 @@ export const {
   }),
 
 }, initialState)
-

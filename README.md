@@ -141,7 +141,7 @@ const { randomUser, sagas, load, loadSuccess, loadFailure, clear } = createModul
     saga: function* (action) {
       return loadSuccess(yield call(fetchRandomUser))
     },
-    onError: (e) => loadFailure(e),
+    onError: (e, action) => loadFailure(e),
   },
 
   LOAD_SUCCESS: (state, { payload: user }) => ({
@@ -165,8 +165,7 @@ const { randomUser, sagas, load, loadSuccess, loadFailure, clear } = createModul
 }, initialState)
 
 export default randomUser
-export { sagas }
-export { load, clear }
+export { sagas, load, clear }
 ```
 
 ## Todos

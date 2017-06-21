@@ -60,17 +60,16 @@ The following two snippets have the same behaviors.
 ```js
 const { myCounter, increment, decrement } = createModule('myCounter', {
 
-  INCREMENT: {
-    reducer: (state, action) => ({
-      counter: state.counter + action.payload,
-    }),
-  },
+  // function form
+  INCREMENT: (state, action) => ({ counter: state.counter + action.payload }),
 
+  // object form
   DECREMENT: {
     reducer: (state, action) => ({
       counter: state.counter - action.payload,
-    })
+    }),
   },
+
 })
 ```
 
@@ -95,22 +94,22 @@ const decrement = payload => ({ type: 'myCounter/DECREMENT', payload })
 
 #### `saga` `onError`
 
-- If you specified `saga` as **a generator function**, it will be a short circuit for [`redux-saga/effects.takeEvery()`](https://github.com/redux-saga/redux-saga/tree/master/docs/api#takeeverypattern-saga-args).  
+- If you specify `saga` as **a generator function**, it will be a short circuit for [`redux-saga/effects.takeEvery()`](https://github.com/redux-saga/redux-saga/tree/master/docs/api#takeeverypattern-saga-args).  
 It also converts...
-  - **`return <Action>`** :arrow_right: **`yield put(<Action>)`**
-  - **`throw <Error>`** :arrow_right: **`onError(<Error>)`** :arrow_right: **`yield put(<Action>)`**  
+  - **`return <SuccessAction>`** :arrow_right: **`yield put(<SuccessAction>)`**
+  - **`throw <Error>`** :arrow_right: **`onError(<Error>, <Action>)`** :arrow_right: **`yield put(<SuccessAction>)`**  
 
-    Note that `onError` can be both of a generator function or a normal function.  
-    The following two snippets have the same behaviors.
+    Note that `onError` can be both of a generator function and a normal function.  
 
-- As an another choice, as **a thunk that returns either generator function or effect.**  
+- As an another choice, use **a thunk that returns either generator function or effect.**  
 You can use another enhanced effect creator by receiving  
-  `({ type, takeEvery, takeLatest, throttle, fork, spawn })` as the first argument.  
-Note that returned generator function is automatically invoked by `fork()`.  
+  **`({ type, takeEvery, takeLatest, throttle, fork, spawn })` as the first argument**.  
+  - Returned generator function is automatically invoked by **non-enhanced `fork()`**.  
+  - When you use enhanced `fork` or `spawn`, **pass `<Action>` as a second argument** to receive it in `onError`.
 
 - As the last choice, create your original enhanced effect by receiving `({ type, enhance })`.
 
-The following four snippets have the same behaviors.
+The following five snippets have the same behaviors.
 
 ```js
 const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
@@ -120,7 +119,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
     saga: function* (action) {
       return requestSuccess(yield call(callApiAsync, action.payload))
     },
-    onError: (e) => requestFailure(e),
+    onError: (e, action) => requestFailure(e),
   },
 
   REQUEST_SUCCESS: {},
@@ -136,7 +135,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
     saga: ({ type, takeEvery }) => takeEvery(type, function* (action) {
       return requestSuccess(yield call(callApiAsync, action.payload))
     }),
-    onError: (e) => requestFailure(e),
+    onError: (e, action) => requestFailure(e),
   },
 
   REQUEST_SUCCESS: {},
@@ -148,12 +147,40 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 ```js
 const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
 
-  // enhance your custom generator function
+  // use enhanced fork
+  // (you should pass action as a second argument of fork() to receive it in onError)
   REQUEST: {
-    saga: ({ type, enhance }) => takeEvery(type, enhance(function* (action) {
-      return requestSuccess(yield call(callApiAsync, action.payload))
-    })),
-    onError: (e) => requestFailure(e),
+    saga: ({ type, fork }) => function* () {
+      while (true) {
+        const action = yield take(type)
+        yield fork(function* () {
+          return requestSuccess(yield call(callApiAsync, action.payload))
+        }, action)
+      }
+    },
+    onError: (e, action) => requestFailure(e),
+  },
+
+  REQUEST_SUCCESS: {},
+  REQUEST_FAILURE: {},
+})
+```
+
+```js
+const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+
+  // enhance your generator manually
+  // (you should pass action as a second argument of fork() to receive it in onError)
+  REQUEST: {
+    saga: ({ type, enhance }) => function* () {
+      while (true) {
+        const action = yield take(type)
+        yield fork(enhance(function* () {
+          return requestSuccess(yield call(callApiAsync, action.payload))
+        }), action)
+      }
+    },
+    onError: (e, action) => requestFailure(e),
   },
 
   REQUEST_SUCCESS: {},
@@ -199,3 +226,23 @@ const barAction = payload => ({ type: '@@myApp/barModule/BAR_ACTION', payload })
 ## `flattenSagas(...sagas)`
 
 Flatten nested sagas to help your store configuration.
+
+```js
+function configureStore(preloadedState) {
+  const sagaMiddleware = createSagaMiddleware()
+
+  const store = createStore(
+    combineReducers(reducers),
+    preloadedState,
+    applyMiddleware(sagaMiddleware),
+  )
+
+  return {
+    ...store,
+    runSaga: () => sagaMiddleware.run(function* () {
+      // run all sagas!
+      yield flattenSagas(sagas)
+    }),
+  }
+}
+```
