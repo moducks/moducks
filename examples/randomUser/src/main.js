@@ -4,7 +4,7 @@ import { Provider, connect } from 'react-redux'
 import getConfigureStore from './store'
 import * as reducers from './moducks'
 import * as sagas from './moducks/sagas'
-import { load, clear } from './ducks/randomUser'
+import { load, clear } from './moducks/randomUser'
 import JSONPretty from 'react-json-pretty'
 
 const preloadedState = undefined

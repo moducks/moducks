@@ -1,4 +1,4 @@
-import { createModule } from '../../es'
+import { createModule } from '../../../../es'
 import { call } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 
@@ -64,3 +64,4 @@ export const {
   }),
 
 }, initialState)
+

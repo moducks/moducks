@@ -1,5 +1,5 @@
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
-import { flattenSagas } from '../es'
+import { flattenSagas } from '../../../es'
 import createSagaMiddleware from 'redux-saga'
 
 export default (reducers, sagas) => function configureStore(preloadedState) {

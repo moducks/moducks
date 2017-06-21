@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "npm -prefix ../ run build && webpack-dev-server"
+    "prestart": "npm install --prefix ../../ && npm --prefix ../../ run build",
+    "start": "webpack-dev-server"
   },
   "dependencies": {
     "react": "^15.6.1",
@@ -15,6 +16,7 @@
     "babel-loader": "^7.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-polyfill": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.5"

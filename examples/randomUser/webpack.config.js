@@ -1,7 +1,7 @@
 var path = require('path')
 
 module.exports = {
-  entry: ['babel-polyfill', './main.js'],
+  entry: ['babel-polyfill', './src/main.js'],
   output: {
     path: path.resolve(__dirname, 'build'),
     publicPath: '/assets/',
@@ -11,11 +11,13 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules|es/,
+        include: [
+          path.resolve(__dirname, "./src"),
+        ],
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['react'],
+            presets: ['react', 'es2015'],
             plugins: ['transform-object-rest-spread'],
           },
         },
