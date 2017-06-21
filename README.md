@@ -1,4 +1,4 @@
-<img src="https://github.com/moducks/moducks/blob/master/logos/logo.png?raw=true" alt="Moducks">
+<img src="https://github.com/moducks/moducks/blob/master/logo/logo.png?raw=true" alt="Moducks">
 
 # moducks
 
