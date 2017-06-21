@@ -1,6 +1,11 @@
 # API Reference
 
 * [`createModule(moduleName, definitions, defaultState)`](#createmodulemodulename-definitions-defaultstate)
+  * [Arguments](#arguments)
+    * [`creator`](#creator)
+    * [`reducer`](#reducer)
+    * [`saga` `onError`](#saga-onerror)
+  * [Return Value](#return-value)
 * [`createApp(appName)(moduleName, definitions, defaultState)`](#createappappnamemodulename-definitions-defaultstate)
 * [`flattenSagas(...sagas)`](#flattensagassagas)
 
@@ -204,6 +209,44 @@ const sagas = {
 
 const requestSuccess = payload => ({ type: 'myClient/REQUEST_SUCCESS', payload })
 const requestFailure = payload => ({ type: 'myClient/REQUEST_FAILURE', payload })
+```
+
+### Return Value
+
+An object like:
+
+```js
+{
+  <moduleName>,
+  sagas,
+  <actionCreator 1>, <actionCreator 2>, ...,
+  <ACTION 1>, <ACTION 2>, ...,
+}
+```
+
+You can export it in your favorite style.
+
+```js
+// true ducks style
+const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', { /* ... */ })
+export default myClient
+export { sagas, request }
+```
+
+```js
+// export reducer without using default (Not compatible with true ducks style)
+const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', { /* ... */ })
+export { myClient, sagas, request }
+```
+
+```js
+// Short hand for exporting all consts (Not compatible with true ducks style)
+export const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', { /* ... */ })
+```
+
+```js
+// Short hand for exporting all consts including action types (Not compatible with true ducks style)
+export const { myClient, sagas, request, requestSuccess, requestFailure, REQUEST, REQUEST_SUCCESS, REQUEST_FAILURE } = createModule('myClient', { /* ... */ })
 ```
 
 ## `createApp(appName)(moduleName, definitions, defaultState)`
