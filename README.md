@@ -7,6 +7,8 @@
 
 Extreamely simple [Ducks] module provider for the stack of [Redux] + [Redux-Saga].
 
+**WARNING: The project is still under development! There are no stable releases!**
+
 ## Getting Started
 
 ### Installing
