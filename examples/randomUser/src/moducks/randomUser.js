@@ -39,10 +39,10 @@ export const {
       ...state,
       pendingCounts: state.pendingCounts + 1,
     }),
-    saga: function* (action) {
+    saga: function* (action) { // eslint-disable-line no-unused-vars
       return loadSuccess(yield call(fetchRandomUser))
     },
-    onError: (e, action) => loadFailure(e),
+    onError: (e, action) => loadFailure(e), // eslint-disable-line no-unused-vars
   },
 
   LOAD_SUCCESS: (state, { payload: user }) => ({

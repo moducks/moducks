@@ -16,7 +16,7 @@ store.runSaga()
 const App = connect(
   ({ randomUser }) => ({ randomUser }),
   { load, clear },
-)(({ randomUser, errors, load, clear }) => {
+)(({ randomUser, load, clear }) => {
   return (
     <div>
       <button onClick={() => load()}>LOAD</button>
