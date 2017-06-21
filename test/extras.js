@@ -2,7 +2,7 @@ import test from 'tape'
 import { takeEvery, takeLatest, throttle, fork, spawn } from 'redux-saga/effects'
 import { flattenSagas } from '../src'
 
-test('it should flatten nested objects and arrays into a flat array of redux-saga effects', assert => {
+test('[Extras] it should flatten nested objects and arrays into a flat array of redux-saga effects', assert => {
 
   const expected = [
     takeEvery('A', function* () { }),

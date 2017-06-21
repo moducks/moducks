@@ -14,11 +14,11 @@ Creates a ducks module.
 - `definitions: Object` - A map of each definition. **Non-prefixed action type** as key, either of the following as value.
   - `definition: Object` - An object that can contain `creator`, `reducer`, `saga` and `onError` as key.
   - `definition: Function` - A single reducer function.
-- `defaultState: Any` - Any for initializing state.
+- `defaultState: Object` - Any objects for initializing state.
 
 #### `creator`
 
-An entry of the first argument `?actionMap` of [`redux-actions.createActions()`](https://github.com/acdlite/redux-actions/blob/master/README.md#createactionsactionmap-identityactions).  
+An second argument (`Function`) or second to third arguments (`Array<Function>`) of [`redux-actions.createAction`](https://github.com/acdlite/redux-actions#createactiontype-payloadcreator--identity-metacreator).  
 It can take a single function or a pair of functions.  
 The following two snippets have the same behaviors.
 
@@ -58,13 +58,13 @@ It can take a single stateless function.
 The following two snippets have the same behaviors.
 
 ```js
-const { myCounter, increment, decrement } = createModule('myCounter', {
+const { myCounter, add, subtract } = createModule('myCounter', {
 
   // function form
-  INCREMENT: (state, action) => ({ counter: state.counter + action.payload }),
+  ADD: (state, action) => ({ counter: state.counter + action.payload }),
 
   // object form
-  DECREMENT: {
+  SUBTRACT: {
     reducer: (state, action) => ({
       counter: state.counter - action.payload,
     }),
@@ -77,10 +77,10 @@ const { myCounter, increment, decrement } = createModule('myCounter', {
 const myCounter = (state, action) => {
   switch (action) {
 
-    case 'myCounter/INCREMENT':
+    case 'myCounter/ADD':
       return state.counter + action.payload
 
-    case 'myCounter/DECREMENT':
+    case 'myCounter/SUBTRACT':
       return state.counter - action.payload
 
     default:
@@ -88,8 +88,8 @@ const myCounter = (state, action) => {
   }
 }
 
-const increment = payload => ({ type: 'myCounter/INCREMENT', payload })
-const decrement = payload => ({ type: 'myCounter/DECREMENT', payload })
+const add = payload => ({ type: 'myCounter/ADD', payload })
+const subtract = payload => ({ type: 'myCounter/SUBTRACT', payload })
 ```
 
 #### `saga` `onError`
@@ -142,7 +142,6 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
   REQUEST_FAILURE: {},
 })
 ```
-
 
 ```js
 const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {

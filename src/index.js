@@ -1,4 +1,4 @@
-import { createActions, handleActions } from 'redux-actions'
+import { createAction, handleActions } from 'redux-actions'
 import camelCase from 'redux-actions/lib/camelCase'
 import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/effects'
 
@@ -53,9 +53,9 @@ const createModuleWithApp = (
 ) => {
 
   const prefix = appName ? `${appName}/` : ''
-  const identityActions = []
-  const actionMap = {}
   const reducerMap = {}
+  const actions = {}
+  const actionCreators = {}
   const sagas = {}
 
   for (const [type, definition] of Object.entries(definitions)) {
@@ -69,8 +69,14 @@ const createModuleWithApp = (
       onError,
     } = typeof definition === 'function' ? { reducer: definition } : definition
 
-    creator ? (actionMap[actionType] = creator) : identityActions.push(actionType)
     reducer && (reducerMap[actionType] = reducer)
+    actions[type] = actionType
+
+    if (Array.isArray(creator)) {
+      actionCreators[camelType] = createAction(actionType, ...creator)
+    } else {
+      actionCreators[camelType] = createAction(actionType, creator || null)
+    }
 
     if (isGeneratorFunction(saga)) {
 
@@ -105,12 +111,8 @@ const createModuleWithApp = (
   return {
     [moduleName]: handleActions(reducerMap, defaultState),
     ...Object.keys(sagas).length ? { sagas } : {},
-    ...Object
-      .entries(createActions(actionMap, ...identityActions))
-      .reduce((prev, [key, value]) => ({ ...prev, [key.slice(`${prefix}${moduleName}/`.length)]: value }), {}),
-    ...Object
-      .keys(definitions)
-      .reduce((prev, key) => ({ ...prev, [key]: `${prefix}${moduleName}/${key}` }), {})
+    ...actionCreators,
+    ...actions,
   }
 }
 
