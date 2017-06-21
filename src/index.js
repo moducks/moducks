@@ -25,6 +25,7 @@ const enhancibleForkerThunks = {
   fork: enhance => (fn, ...args) => fork(enhance(fn), ...args),
   spawn: enhance => (fn, ...args) => spawn(enhance(fn), ...args),
 }
+
 const enhanceThunk = onError => saga => function* (...args) {
   if (!isGeneratorFunction(saga)) {
     throw new Error('Enhanced target must be generator function.')
