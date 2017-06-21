@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "prestart": "npm install --prefix ../../ && npm --prefix ../../ run build",
+    "preinstall": "npm install --prefix ../../ && npm --prefix ../../ run build",
     "start": "webpack-dev-server"
   },
   "dependencies": {
