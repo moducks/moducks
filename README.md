@@ -5,7 +5,7 @@
 [![npm version](https://badge.fury.io/js/moducks.svg)](https://badge.fury.io/js/moducks)
 [![Build Status](https://travis-ci.org/moducks/moducks.svg?branch=master)](https://travis-ci.org/moducks/moducks)
 
-[Ducks] ([Redux] Reducer Bundles) + [Redux-Saga] = **Moducks**
+[Ducks]  ([Redux] Reducer Bundles) + [Redux-Saga] = **Moducks**
 
 **WARNING: The project is still under development! There are no stable releases!**
 
