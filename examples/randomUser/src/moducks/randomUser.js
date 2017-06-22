@@ -26,12 +26,8 @@ const fetchRandomUser = async () => {
 }
 
 export const {
-  randomUser,
-  sagas,
-  load,
-  loadSuccess,
-  loadFailure,
-  clear,
+  randomUser, sagas,
+  load, loadSuccess, loadFailure, clear,
 } = createModule('randomUser', {
 
   LOAD: {
@@ -64,4 +60,3 @@ export const {
   }),
 
 }, initialState)
-

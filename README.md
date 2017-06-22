@@ -132,7 +132,10 @@ const initialState = {
   pendingCounts: 0,
 }
 
-const { randomUser, sagas, load, loadSuccess, loadFailure, clear } = createModule('randomUser', {
+const {
+  randomUser, sagas,
+  load, loadSuccess, loadFailure, clear,
+} = createModule('randomUser', {
 
   LOAD: {
     reducer: (state) => ({
