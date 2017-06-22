@@ -5,12 +5,14 @@ import { fork, call, take } from 'redux-saga/effects'
 import { createModule, flattenSagas } from '../src'
 
 function configureStore(reducer, sagas) {
+
   const sagaMiddleware = createSagaMiddleware()
+
   const store = createStore(
     reducer,
-    undefined,
     applyMiddleware(sagaMiddleware),
   )
+
   return {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
@@ -20,7 +22,9 @@ function configureStore(reducer, sagas) {
 }
 
 async function callApiAsync(payload) {
+
   await delay(1)
+
   if (payload.includes('foo')) {
     return `Success_${payload}`
   } else {

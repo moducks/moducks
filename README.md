@@ -32,12 +32,15 @@ Please consider the following fake API:
 import { delay } from 'redux-saga'
 
 export const fetchRandomUser = async () => {
+
   await delay((0.3 + Math.random()) * 1000)
+
   if (Math.random() < 0.2) {
     // Sometimes it fails
     const faces = ['xD', ':D', ':(']
     throw new Error(`503 Service Unavailable ${faces[Math.floor(Math.random() * faces.length)]}`)
   }
+
   const users = [
     { name: 'John' },
     { name: 'Mary' },
@@ -45,6 +48,7 @@ export const fetchRandomUser = async () => {
     { name: 'Cathy' },
     { name: 'Mike' },
   ]
+
   return users[Math.floor(Math.random() * users.length)]
 }
 ```
@@ -65,13 +69,13 @@ const loadSuccess = (data) => ({ type: LOAD_SUCCESS, payload: data })
 const loadFailure = (error) => ({ type: LOAD_FAILURE, payload: error, error: true })
 export const clear = () => ({ type: CLEAR })
 
-const initialState = {
+const defaultState = {
   users: [],
   errors: [],
   pendingCounts: 0,
 }
 
-export default (state = initialState, { type, payload }) => {
+export default (state = defaultState, { type, payload }) => {
   switch (type) {
 
     case LOAD:
@@ -126,7 +130,7 @@ import { createModule } from 'moducks'
 import { call } from 'redux-saga/effects'
 import { fetchRandomUser } from '../api'
 
-const initialState = {
+const defaultState = {
   users: [],
   errors: [],
   pendingCounts: 0,
@@ -166,7 +170,7 @@ const {
     errors: [],
   }),
 
-}, initialState)
+}, defaultState)
 
 export default randomUser
 export { sagas, load, clear }

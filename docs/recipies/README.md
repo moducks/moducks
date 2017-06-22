@@ -12,6 +12,7 @@ First, define prefix using [`createApp()`](../api#createappappnamemodulename-def
 ```js
 // app/index.js
 import { createApp } from 'moducks'
+
 export const createModule = createApp('@@myApp')
 ```
 
@@ -20,12 +21,14 @@ Then import it to define each moducks.
 ```js
 // app/moducks/fooModule.js
 import { createModule } from '../app'
+
 export const { fooModule, /* ... */ } = createModule('fooModule', { /* ... */ }, {})
 ```
 
 ```js
 // app/moducks/barModule.js
 import { createModule } from '../app'
+
 export const { barModule, /* ... */ } = createModule('barModule', { /* ... */ }, {})
 ```
 
@@ -41,6 +44,7 @@ const {
   myClient, sagas,
   request, requestSuccess, requestFailure,
 } = createModule('myClient', { /* ... */ }, {})
+
 export default myClient
 export { sagas, request }
 ```
@@ -51,6 +55,7 @@ const {
   myClient, sagas,
   request, requestSuccess, requestFailure,
 } = createModule('myClient', { /* ... */ }, {})
+
 export { myClient, sagas, request }
 ```
 
@@ -83,26 +88,30 @@ export const {
   start, stop, tick,
   START, STOP, TICK,
 } = createModule('timer', {
+
   START: state => ({ ...state, running: true }),
   STOP: state => ({ ...state, running: false }),
   TICK: state => ({ ...state, elapsed: elapsed + 1 }),
+
 }, {
   running: false,
   elapsed: 0,
 })
 
 Object.assign(sagas, {
-  tick: function* () {
+
+  tick: fork(function* () {
     while (true) {
-      const action = take(START)
-      while (race({
+      const action = yield take(START)
+      while ((yield race({
         tick: delay(1000),
         stop: take(STOP),
-      }).tick) {
+      })).tick) {
         yield put(tick())
       }
     }
-  },
+  }),
+
 })
 ```
 
@@ -110,6 +119,7 @@ Object.assign(sagas, {
 
 ```js
 function configureStore(reducers, sagas) {
+
   const sagaMiddleware = createSagaMiddleware()
 
   const store = createStore(

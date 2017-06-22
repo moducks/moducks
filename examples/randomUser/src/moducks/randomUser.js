@@ -2,19 +2,22 @@ import { createModule } from '../../../../es'
 import { call } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 
-const initialState = {
+const defaultState = {
   users: [],
   errors: [],
   pendingCounts: 0,
 }
 
 const fetchRandomUser = async () => {
+
   await delay((0.3 + Math.random()) * 1000)
+
   if (Math.random() < 0.2) {
     // Sometimes it fails
     const faces = ['xD', ':D', ':(']
     throw new Error(`503 Service Unavailable ${faces[Math.floor(Math.random() * faces.length)]}`)
   }
+
   const users = [
     { name: 'John' },
     { name: 'Mary' },
@@ -22,6 +25,7 @@ const fetchRandomUser = async () => {
     { name: 'Cathy' },
     { name: 'Mike' },
   ]
+
   return users[Math.floor(Math.random() * users.length)]
 }
 
@@ -59,4 +63,4 @@ export const {
     errors: [],
   }),
 
-}, initialState)
+}, defaultState)

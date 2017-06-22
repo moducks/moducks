@@ -3,6 +3,7 @@ import { flattenSagas } from '../../../es'
 import createSagaMiddleware from 'redux-saga'
 
 export default function configureStore(reducers, sagas) {
+
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
   const sagaMiddleware = createSagaMiddleware()
 

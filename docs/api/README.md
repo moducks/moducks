@@ -44,7 +44,8 @@ const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule',
   },
 
   // string form: **Just omit this parameter!**
-  ACTION_THREE: {}
+  ACTION_THREE: {},
+
 }, {})
 ```
 
@@ -129,6 +130,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+
 }, {})
 ```
 
@@ -145,6 +147,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+
 }, {})
 ```
 
@@ -167,6 +170,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+
 }, {})
 ```
 
@@ -189,6 +193,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+
 }, {})
 ```
 
@@ -205,6 +210,7 @@ const sagas = {
       yield put(requestFailure(e))
     }
   }),
+
 }
 
 const requestSuccess = payload => ({ type: 'myClient/REQUEST_SUCCESS', payload })
@@ -217,10 +223,19 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
 
 ```js
 {
-  myClient,
-  sagas,
-  actionFoo, actionBar,
-  ACTION_FOO, ACTION_BAR,
+  myClient: (state, action) => { /* ... */ },
+  sagas: {
+    actionFoo: takeEvery(function* () {
+      /* ... */
+    }),
+    actionBar: takeEvery(function* () {
+      /* ... */
+    }),
+  }
+  actionFoo: (payload) => { /* ... */ },
+  actionBar: (payload) => { /* ... */ },
+  ACTION_FOO: 'myModule/ACTION_FOO',
+  ACTION_BAR: 'myModule/ACTION_BAR',
 }
 ```
 
