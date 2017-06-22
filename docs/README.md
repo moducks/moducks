@@ -1,4 +1,4 @@
 # Documentation
 
 - [API Reference](./api)
-- Recipies
+- [Recipies](./recipies)

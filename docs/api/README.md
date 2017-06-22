@@ -23,7 +23,7 @@ Creates a ducks module.
 
 #### `creator`
 
-An second argument (`Function`) or second to third arguments (`Array<Function>`) of [`redux-actions.createAction`](https://github.com/acdlite/redux-actions#createactiontype-payloadcreator--identity-metacreator).  
+An second argument (`Function`) or second to third arguments (`Array<Function>`) of [`redux-actions.createAction()`](https://github.com/acdlite/redux-actions#createactiontype-payloadcreator--identity-metacreator).  
 It can take a single function or a pair of functions.  
 The following two snippets have the same behaviors.
 
@@ -224,30 +224,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
 }
 ```
 
-You can export it in your favorite style.
-
-```js
-// true ducks style
-const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', { /* ... */ })
-export default myClient
-export { sagas, request }
-```
-
-```js
-// export reducer without using default (Not compatible with true ducks style)
-const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', { /* ... */ })
-export { myClient, sagas, request }
-```
-
-```js
-// Short hand for exporting all consts (Not compatible with true ducks style)
-export const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', { /* ... */ })
-```
-
-```js
-// Short hand for exporting all consts including action types (Not compatible with true ducks style)
-export const { myClient, sagas, request, requestSuccess, requestFailure, REQUEST, REQUEST_SUCCESS, REQUEST_FAILURE } = createModule('myClient', { /* ... */ })
-```
+*cf. [Recipies - Export moducks](../recipies#export-moducks)*
 
 ## `createApp(appName)(moduleName, definitions, defaultState)`
 
@@ -265,26 +242,54 @@ const fooAction = payload => ({ type: '@@myApp/fooModule/FOO_ACTION', payload })
 const barAction = payload => ({ type: '@@myApp/barModule/BAR_ACTION', payload })
 ```
 
+*cf. [Recipies - Define pre-prefixed `createModule()`](../recipies#define-pre-prefixed-createmodule)*
+
 ## `flattenSagas(...sagas)`
 
 Flatten nested sagas to help your store configuration.
 
 ```js
-function configureStore(preloadedState) {
-  const sagaMiddleware = createSagaMiddleware()
-
-  const store = createStore(
-    combineReducers(reducers),
-    preloadedState,
-    applyMiddleware(sagaMiddleware),
-  )
-
-  return {
-    ...store,
-    runSaga: () => sagaMiddleware.run(function* () {
-      // run all sagas!
-      yield flattenSagas(sagas)
-    }),
-  }
-}
+flattenSagas(
+  {
+    a: {
+      b: takeEvery('A', function* () { }),
+      c: {
+        d: takeLatest('B', function* () { }),
+        e: 'foo',
+        f: [],
+      },
+    },
+    g: throttle(100, 'C', function* () { }),
+  },
+  [
+    {
+      h: fork(function* () { }),
+    },
+    'bar',
+    null,
+    undefined,
+    0,
+    Symbol('baz'),
+    x => 1,
+    {
+      i: [
+        spawn(function* () { }),
+      ],
+    },
+  ],
+)
 ```
+
+It returns:
+
+```js
+[
+  takeEvery('A', function* () { }),
+  takeLatest('B', function* () { }),
+  throttle(100, 'C', function* () { }),
+  fork(function* () { }),
+  spawn(function* () { }),
+]
+```
+
+*cf. [Recipies- Define `configureStore()`](../recipies#define-configurestore)*
