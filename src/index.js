@@ -111,7 +111,7 @@ const createModuleWithApp = (
 
   return {
     [moduleName]: handleActions(reducerMap, defaultState),
-    ...Object.keys(sagas).length ? { sagas } : {},
+    sagas,
     ...actionCreators,
     ...actions,
   }
