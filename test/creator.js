@@ -15,7 +15,7 @@ const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule',
   },
 
   ACTION_THREE: {}
-})
+}, {})
 
 test('[Reducer] it should create a noop reducer', assert => {
 

@@ -45,11 +45,11 @@ const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule',
 
   // string form: **Just omit this parameter!**
   ACTION_THREE: {}
-})
+}, {})
 ```
 
 ```js
-const myModule = state => state
+const myModule = (state = {}) => state
 
 const actionOne = (key, value) => ({ type: 'myModule/ACTION_ONE', payload: { [key]: value } })
 const actionTwo = (first, second) => ({ type: 'myModule/ACTION_TWO', payload: [first], meta: { second } })
@@ -75,11 +75,11 @@ const { myCounter, add, subtract } = createModule('myCounter', {
     }),
   },
 
-})
+}, { counter: 0 })
 ```
 
 ```js
-const myCounter = (state, action) => {
+const myCounter = (state = { counter: 0 }, action) => {
   switch (action) {
 
     case 'myCounter/ADD':
@@ -129,7 +129,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
-})
+}, {})
 ```
 
 ```js
@@ -145,7 +145,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
-})
+}, {})
 ```
 
 ```js
@@ -167,7 +167,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
-})
+}, {})
 ```
 
 ```js
@@ -189,11 +189,11 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
-})
+}, {})
 ```
 
 ```js
-const myClient = state => state
+const myClient = (state = {}) => state
 
 const sagas = {
 
