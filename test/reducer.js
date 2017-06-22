@@ -1,6 +1,8 @@
 import test from 'tape'
 import { createModule } from '../src'
 
+const defaultState = { counter: 2 }
+
 const { myCounter, add, subtract } = createModule('myCounter', {
 
   // function form
@@ -13,7 +15,7 @@ const { myCounter, add, subtract } = createModule('myCounter', {
     }),
   },
 
-}, { counter: 2 })
+}, defaultState)
 
 test('[Reducer] it should add 1', assert => {
 
