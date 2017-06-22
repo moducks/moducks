@@ -1,16 +1,13 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider, connect } from 'react-redux'
-import getConfigureStore from './store'
+import configureStore from './store'
 import * as reducers from './moducks'
 import * as sagas from './moducks/sagas'
 import { load, clear } from './moducks/randomUser'
 import JSONPretty from 'react-json-pretty'
 
-const preloadedState = undefined
-const configureStore = getConfigureStore(reducers, sagas)
-const store = configureStore(preloadedState)
-
+const store = configureStore(reducers, sagas)
 store.runSaga()
 
 const App = connect(
