@@ -2,9 +2,9 @@ import { createAction, handleActions } from 'redux-actions'
 import camelCase from 'redux-actions/lib/camelCase'
 import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/effects'
 
-const isGenerator = obj => {
-  return obj && typeof obj.next === 'function' && typeof obj.throw === 'function'
-}
+const IO = '@@redux-saga/IO'
+
+const isGenerator = obj => obj && typeof obj.next === 'function' && typeof obj.throw === 'function'
 const isGeneratorFunction = obj => {
   if (!obj || !obj.constructor) return false
   if (obj.constructor.name === 'GeneratorFunction' || obj.constructor.displayName === 'GeneratorFunction') return true
@@ -14,9 +14,7 @@ const isNormalFunction = obj => {
   if (!obj || !obj.constructor) return false
   return obj.constructor.name === 'Function' || obj.constructor.displayName === 'Function'
 }
-const isForkEffect = obj => {
-  return obj && obj['@@redux-saga/IO'] && obj['FORK']
-}
+const isForkEffect = obj => obj && obj[IO] && obj.FORK
 
 const enhancibleForkerThunks = {
   takeEvery: enhance => (patternOrChannel, worker, ...args) => takeEvery(patternOrChannel, enhance(worker), ...args),
@@ -72,12 +70,7 @@ const createModuleWithApp = (
 
     reducer && (reducerMap[actionType] = reducer)
     actions[type] = actionType
-
-    if (Array.isArray(creator)) {
-      actionCreators[camelType] = createAction(actionType, ...creator)
-    } else {
-      actionCreators[camelType] = createAction(actionType, creator || null)
-    }
+    actionCreators[camelType] = createAction(actionType, ...(Array.isArray(creator) ? creator : [ creator ]))
 
     if (isGeneratorFunction(saga)) {
 
@@ -128,7 +121,7 @@ export const flattenSagas = (...sagas) => {
   while (stack.length) {
     const item = stack.shift()
     if (typeof item !== 'object' || item === null) continue
-    if (item['@@redux-saga/IO']) storage.push(item)
+    if (item[IO]) storage.push(item)
     stack.unshift(...Object.values(item))
   }
 
