@@ -5,7 +5,7 @@
 [![npm version](https://badge.fury.io/js/moducks.svg)](https://badge.fury.io/js/moducks)
 [![Build Status](https://travis-ci.org/moducks/moducks.svg?branch=master)](https://travis-ci.org/moducks/moducks)
 
-[Ducks]  ([Redux] Reducer Bundles) + [Redux-Saga] = **Moducks**
+[Ducks](https://github.com/erikras/ducks-modular-redux) ([Redux] Reducer Bundles) + [Redux-Saga] = **Moducks**
 
 **WARNING: The project is still under development! There are no stable releases!**
 
@@ -176,6 +176,5 @@ export default randomUser
 export { sagas, load, clear }
 ```
 
-[Ducks]: https://github.com/erikras/ducks-modular-redux
 [Redux]: https://github.com/reactjs/redux
 [Redux-Saga]: https://github.com/redux-saga/redux-saga
