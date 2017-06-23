@@ -76,8 +76,7 @@ test('randomUser: reducer', assert => {
 
 test('randomUser: sagas: loadSaga (Success)', assert => {
 
-  const loadSaga = sagas.load.FORK.args[1]
-  const iterator = loadSaga(load())
+  const iterator = retrieveWorkers(sagas).load(load())
   let current
 
   current = iterator.next()
@@ -103,8 +102,7 @@ test('randomUser: sagas: loadSaga (Success)', assert => {
 
 test('randomUser: sagas: loadSaga (Failure)', assert => {
 
-  const loadSaga = sagas.load.FORK.args[1]
-  const iterator = loadSaga(load())
+  const iterator = retrieveWorkers(sagas).load(load())
   let current
 
   current = iterator.next()
