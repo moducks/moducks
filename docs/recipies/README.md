@@ -33,7 +33,7 @@ import { createModule } from '../app'
 export const { barModule, /* ... */ } = createModule('barModule', { /* ... */ }, {})
 ```
 
-*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState, additionalSagas)`](../api#createappappnamemodulename-definitions-defaultstate-additionalsagas--)*
+*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState, additionalSagas = {})`](../api#createappappnamemodulename-definitions-defaultstate-additionalsagas--)*
 
 ## Export moducks
 
@@ -142,7 +142,7 @@ function configureStore(reducers, sagas) {
 ## Testing with `retrieveWorkers()`
 
 The exported object `sagas` values are FORK effects rather than raw generator functions.  
-You can use [`retrieveWorkers() or retrieveWorker()`](api#retrieveworkerssagas-retrieveworkersaga) to retrieve the latter.
+You can use [`retrieveWorkers() or retrieveWorker()`](../api#retrieveworkerssagas-retrieveworkersaga) to retrieve the latter.
 
 ```js
 import test from 'tape'
