@@ -53,7 +53,7 @@ const createModuleWithApp = (
   appName,
 ) => {
 
-  const prefix = appName ? `${appName}/` : ''
+  const prefix = appName ? `@@${appName}/` : ''
   const reducerMap = {}
   const actions = {}
   const actionCreators = {}

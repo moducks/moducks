@@ -243,11 +243,11 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
 
 ## `createApp(appName)(moduleName, definitions, defaultState)`
 
-Pre-prefix your future modules.  
+Pre-prefix your future modules with `@@${appName}`.  
 The following two snippets have the same behaviors.
 
 ```js
-const createMyAppModule = createApp('@@myApp')
+const createMyAppModule = createApp('myApp')
 const { fooAction } = createMyAppModule('fooModule', { FOO_ACTION: {} })
 const { barAction } = createMyAppModule('barModule', { BAR_ACTION: {} })
 ```

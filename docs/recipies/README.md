@@ -13,7 +13,7 @@ First, define prefix using [`createApp()`](../api#createappappnamemodulename-def
 // app/index.js
 import { createApp } from 'moducks'
 
-export const createModule = createApp('@@myApp')
+export const createModule = createApp('myApp')
 ```
 
 Then import it to define each moducks.

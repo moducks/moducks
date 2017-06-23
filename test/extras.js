@@ -48,7 +48,7 @@ test('[Extras] it should flatten nested objects and arrays into a flat array of 
 
 test('[Extras] it pre-prefixes module names', assert => {
 
-  const createMyAppModule = createApp('@@myApp')
+  const createMyAppModule = createApp('myApp')
   const { fooAction } = createMyAppModule('fooModule', { FOO_ACTION: {} })
   const { barAction } = createMyAppModule('barModule', { BAR_ACTION: {} })
 
