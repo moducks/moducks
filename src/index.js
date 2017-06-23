@@ -4,6 +4,8 @@ import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/ef
 
 const IO = '@@redux-saga/IO'
 
+const mapValues = (obj, f) => Object.entries(obj).reduce((prev, [key, value]) => ({ ...prev, [key]: f(value) }), {})
+
 const isGenerator = obj => obj && typeof obj.next === 'function' && typeof obj.throw === 'function'
 const isGeneratorFunction = obj => {
   if (!obj || !obj.constructor) return false
@@ -14,7 +16,13 @@ const isNormalFunction = obj => {
   if (!obj || !obj.constructor) return false
   return obj.constructor.name === 'Function' || obj.constructor.displayName === 'Function'
 }
+
 const isForkEffect = obj => obj && obj[IO] && obj.FORK
+const toForkEffect = (value, msg) => {
+  if (isGeneratorFunction(value)) return fork(value)
+  if (isForkEffect(value)) return value
+  throw new Error(msg)
+}
 
 const enhancibleForkerThunks = {
   takeEvery: enhance => (patternOrChannel, worker, ...args) => takeEvery(patternOrChannel, enhance(worker), ...args),
@@ -23,7 +31,6 @@ const enhancibleForkerThunks = {
   fork: enhance => (fn, ...args) => fork(enhance(fn), ...args),
   spawn: enhance => (fn, ...args) => spawn(enhance(fn), ...args),
 }
-
 const enhanceThunk = onError => saga => function* (...args) {
   if (!isGeneratorFunction(saga)) {
     throw new Error('Enhanced target must be generator function.')
@@ -48,6 +55,7 @@ const createModuleWithApp = (
   moduleName,
   definitions,
   defaultState,
+  additionalSagas,
   appName,
 ) => {
 
@@ -73,33 +81,22 @@ const createModuleWithApp = (
     actionCreators[camelType] = createAction(actionType, ...(Array.isArray(creator) ? creator : [ creator ]))
 
     if (isGeneratorFunction(saga)) {
-
       sagas[camelType] = takeEvery(actionType, enhanceThunk(onError)(saga))
-
     } else if (isNormalFunction(saga)) {
-
       const enhance = enhanceThunk(onError)
       const returnValue = saga({
         type: actionType,
-        ...Object
-          .entries(enhancibleForkerThunks)
-          .reduce((prev, [key, value]) => ({ ...prev, [key]: value(enhance) }), {}),
+        ...mapValues(enhancibleForkerThunks, value => value(enhance)),
         enhance,
       })
-      if (isGeneratorFunction(returnValue)) {
-        sagas[camelType] = fork(returnValue)
-      } else if (isForkEffect(returnValue)) {
-        sagas[camelType] = returnValue
-      } else {
-        throw new Error('Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
-      }
-
+      sagas[camelType] = toForkEffect(returnValue, 'Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
     } else if (saga) {
-
       throw new Error('Invalid saga: Saga must be specified as generator function or thunk that returns either redux-saga FORK effect or generator function.')
-
     }
+  }
 
+  for (const [camelType, saga] of Object.entries(additionalSagas)) {
+    sagas[camelType] = toForkEffect(saga, 'Invalid saga: Each of additional sagas must be generator function or redux-saga FORK effect.')
   }
 
   return {
@@ -110,20 +107,27 @@ const createModuleWithApp = (
   }
 }
 
-export const createModule = (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState)
-export const createApp = appName => (moduleName, definitions, defaultState) => createModuleWithApp(moduleName, definitions, defaultState, appName)
+export const createModule = (moduleName, definitions, defaultState, additionalSagas = {}) => createModuleWithApp(moduleName, definitions, defaultState, additionalSagas)
+export const createApp = appName => (moduleName, definitions, defaultState, additionalSagas = {}) => createModuleWithApp(moduleName, definitions, defaultState, additionalSagas, appName)
 
 export const flattenSagas = (...sagas) => {
-
   const storage = []
-  const stack = sagas
-
-  while (stack.length) {
-    const item = stack.shift()
-    if (typeof item !== 'object' || item === null) continue
-    if (item[IO]) storage.push(item)
-    stack.unshift(...Object.values(item))
+  while (sagas.length) {
+    const saga = sagas.shift()
+    if (typeof saga !== 'object' || saga === null) continue
+    if (saga[IO]) storage.push(saga)
+    sagas.unshift(...Object.values(saga))
   }
-
   return storage
 }
+
+export const retrieveWorker = saga => {
+  if (!isForkEffect(saga)) {
+    throw new Error('Invalid saga: The value must be redux-saga FORK effect.')
+  }
+  for (const arg of [saga.FORK.fn, ...saga.FORK.args]) {
+    if (isGeneratorFunction(arg)) return arg
+  }
+  throw new Error('Invalid saga: GeneratorFunction not found.')
+}
+export const retrieveWorkers = sagas => mapValues(sagas, retrieveWorker)

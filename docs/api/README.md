@@ -1,29 +1,31 @@
 # API Reference
 
-* [`createModule(moduleName, definitions, defaultState)`](#createmodulemodulename-definitions-defaultstate)
+* [`createModule(moduleName, definitions, defaultState, additionalSagas = {})`](#createmodulemodulename-definitions-defaultstate-additionalsagas--)
   * [Arguments](#arguments)
     * [`creator`](#creator)
     * [`reducer`](#reducer)
     * [`saga` `onError`](#saga-onerror)
   * [Return Value](#return-value)
-* [`createApp(appName)(moduleName, definitions, defaultState)`](#createappappnamemodulename-definitions-defaultstate)
+* [`createApp(appName)(moduleName, definitions, defaultState, additionalSagas = {})`](#createappappnamemodulename-definitions-defaultstate-additionalsagas--)
 * [`flattenSagas(...sagas)`](#flattensagassagas)
+* [`retrieveWorkers(sagas)` `retrieveWorker(saga)`](#retrieveworkerssagas-retrieveworkersaga)
 
-## `createModule(moduleName, definitions, defaultState)`
+## `createModule(moduleName, definitions, defaultState, additionalSagas = {})`
 
 Creates a ducks module.
 
 ### Arguments
 
-- `moduleName: string` - A name of its ducks. It is used for **reducer function name** and prefixing actions.
-- `definitions: Object` - A map of each definition. **Non-prefixed action type** as key, either of the following as value.
-  - `definition: Object` - An object that can contain `creator`, `reducer`, `saga` and `onError` as key.
-  - `definition: Function` - A single reducer function.
-- `defaultState: Object` - Any objects for initializing state.
+| # | Name | Type | Required | Description |
+|:--|:--|:--|:--:|:--|
+| 1 | **`moduleName`** | string | * | A name of its ducks. It is used for **reducer function name** and prefixing actions. |
+| 2 | **`definitions`** | Object | * | A map of each definition. **Non-prefixed action type** as key, either of the following as value.  <table><tr><th>Type</th><th>Description</th></tr><tr><td>Object</td><td>An object that can contain `creator`, `reducer`, `saga` and `onError` as key.</ld></tr><tr><td>Function</td><td>A single reducer function.</td></tr></table> |
+| 3 | **`defaultState`** | Object | * | Any objects for initializing state. |
+| 4 | `additionalSagas` | Object | | Additional generators for creating complicated sagas.<br>*cf. [Define complicated sagas](../recipies#define-complicated-sagas)* |
 
 #### `creator`
 
-An second argument (`Function`) or second to third arguments (`Array<Function>`) of [`redux-actions.createAction()`](https://github.com/acdlite/redux-actions#createactiontype-payloadcreator--identity-metacreator).  
+An second argument (Function) or second to third arguments (Array of Function) of [`redux-actions.createAction()`](https://github.com/acdlite/redux-actions#createactiontype-payloadcreator--identity-metacreator).  
 It can take a single function or a pair of functions.  
 The following two snippets have the same behaviors.
 
@@ -241,7 +243,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
 
 *cf. [Recipies - Export moducks](../recipies#export-moducks)*
 
-## `createApp(appName)(moduleName, definitions, defaultState)`
+## `createApp(appName)(moduleName, definitions, defaultState, additionalSagas = {})`
 
 Pre-prefix your future modules with `@@${appName}`.  
 The following two snippets have the same behaviors.
@@ -307,4 +309,24 @@ It returns:
 ]
 ```
 
-*cf. [Recipies- Define `configureStore()`](../recipies#define-configurestore)*
+*cf. [Recipies - Define `configureStore()`](../recipies#define-configurestore)*
+
+## `retrieveWorkers(sagas)` `retrieveWorker(saga)`
+
+Unwrap your `sagas` to retrieve worker generator functions.  
+
+```js
+const sagas = {
+  foo: takeEvery('FOO', function* () {}),
+  bar: throttle(100, 'BAR', function* () {}),
+  baz: fork(function* () {}),
+}
+```
+
+It's helpful for unit testing.
+
+```js
+const { foo, bar, baz } = retrieveWorkers(sagas) // retrieved values are generator functions
+```
+
+*cf. [Recipies - Testing with `retrieveWorkers()`](../recipies#testing-with-retrieveworkers)*

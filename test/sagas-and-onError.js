@@ -1,8 +1,8 @@
 import test from 'tape'
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import createSagaMiddleware, { delay, END } from 'redux-saga'
-import { fork, call, take } from 'redux-saga/effects'
-import { createModule, flattenSagas } from '../src'
+import { fork, spawn, call, take, takeEvery } from 'redux-saga/effects'
+import { createModule, flattenSagas, retrieveWorkers } from '../src'
 
 function configureStore(reducer, sagas) {
 
@@ -240,4 +240,35 @@ test('[Sagas and onError] it should work with manually enhanced generator', asse
   store.dispatch({ type: 'myClient/REQUEST', payload: 'bar2' })
   store.dispatch({ type: 'myClient/REQUEST', payload: 'foo3' })
   store.dispatch(END)
+})
+
+test('[Sagas and onError] it should bundle additional sagas', assert => {
+
+  const expected1 = {
+    foo: function* s1() { },
+    bar: function* s2() { },
+    baz: function* s3() { },
+    qux: function* s4() { },
+  }
+  const expected2 = {
+    foo: takeEvery('dummy/FOO', expected1.foo),
+    bar: fork(expected1.bar),
+    baz: fork(expected1.baz),
+    qux: spawn(expected1.qux),
+  }
+  const { sagas } = createModule('dummy', {
+    FOO: {
+      saga: ({ type }) => takeEvery(type, expected1.foo),
+    },
+    BAR: {
+      saga: () => expected1.bar,
+    }
+  }, {}, {
+    baz: expected1.baz,
+    qux: spawn(expected1.qux),
+  })
+
+  assert.deepEqual(sagas, expected2)
+  assert.deepEqual(retrieveWorkers(sagas), expected1)
+  assert.end()
 })

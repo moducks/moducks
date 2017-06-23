@@ -6,6 +6,7 @@ import {
 } from '../src/moducks/randomUser'
 import { ActionTypes } from 'redux/lib/createStore'
 import { call, put } from 'redux-saga/effects'
+import { retrieveWorkers } from '../../../es'
 
 test('randomUser: creators', assert => {
 

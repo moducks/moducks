@@ -7,6 +7,7 @@
     "lint-src": "eslint src",
     "lint-examples": "eslint examples",
     "test": "npm run lint-src && babel-node test/index.js | tap-spec",
+    "test-without-lint": "babel-node test/index.js | tap-spec",
     "build": "babel src --out-dir es",
     "prepublish": "in-publish && (git diff --no-ext-diff --quiet --exit-code src .gitignore package.json README.md LICENSE || (echo \"Please commit changes!\" && false)) && npm test && npm run build || not-in-publish"
   },

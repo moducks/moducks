@@ -4,10 +4,11 @@
 * [Export moducks](#export-moducks)
 * [Define complicated sagas](#define-complicated-sagas)
 * [Define `configureStore()`](#define-configurestore)
+* [Testing with `retrieveWorkers()`](#testing-with-retrieveworkers)
 
 ## Define pre-prefixed `createModule()`
 
-First, define prefix using [`createApp()`](../api#createappappnamemodulename-definitions-defaultstate) to export it.
+First, define prefix using [`createApp()`](../api#createappappnamemodulename-definitions-defaultstate-additionalsagas--) to export it.
 
 ```js
 // app/index.js
@@ -32,7 +33,7 @@ import { createModule } from '../app'
 export const { barModule, /* ... */ } = createModule('barModule', { /* ... */ }, {})
 ```
 
-*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState)`](../api#createappappnamemodulename-definitions-defaultstate)*
+*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState, additionalSagas)`](../api#createappappnamemodulename-definitions-defaultstate-additionalsagas--)*
 
 ## Export moducks
 
@@ -80,9 +81,14 @@ export const {
 
 ## Define complicated sagas
 
-If you need to define complicated sagas corresponding to multiple actions, use [`Object.assign()`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) to mix them.
+If you need to define complicated sagas corresponding to multiple actions, pass them as the fourth argument of [`createModule()`](../api#createmodulemodulename-definitions-defaultstate-additionalsagas). They are automatically invoked by `fork()`.
 
 ```js
+const defaultState =  {
+  running: false,
+  elapsed: 0,
+}
+
 export const {
   timer, sagas,
   start, stop, tick,
@@ -91,29 +97,23 @@ export const {
 
   START: state => ({ ...state, running: true }),
   STOP: state => ({ ...state, running: false }),
-  TICK: state => ({ ...state, elapsed: elapsed + 1 }),
+  TICK: state => ({ ...state, elapsed: state.elapsed + 1 }),
 
-}, {
-  running: false,
-  elapsed: 0,
-})
+}, defaultState, {
 
-Object.assign(sagas, {
-
-  tick: fork(function* () {
+  worker: function* () {
     while (true) {
       const action = yield take(START)
-      while ((yield race({
-        tick: delay(1000),
-        stop: take(STOP),
-      })).tick) {
+      while ((yield race({ tick: delay(1000), stop: take(STOP) })).tick) {
         yield put(tick())
       }
     }
-  }),
+  },
 
 })
 ```
+
+The FORK effect from additional generator function `worker()` is also accessible as `sagas.worker`.
 
 ## Define `configureStore()`
 
@@ -138,3 +138,43 @@ function configureStore(reducers, sagas) {
 ```
 
 *cf. [API Reference - `flattenSagas(...sagas)`](../api#flattensagassagas)*
+
+## Testing with `retrieveWorkers()`
+
+The exported object `sagas` values are FORK effects rather than raw generator functions.  
+You can use [`retrieveWorkers() or retrieveWorker()`](api#retrieveworkerssagas-retrieveworkersaga) to retrieve the latter.
+
+```js
+import test from 'tape'
+import { call, put } from 'redux-saga/effects'
+import { sagas, load, loadSuccess } from './myModule'
+import callApiAsync from '../api'
+
+test('Test sagas', assert => {
+
+  const workers = retrieveWorkers(sagas)
+
+  const iterator = workers.load(load(/* API params */))
+  let current
+
+  current = iterator.next()
+  assert.deepEqual(current, {
+    done: false,
+    value: put(call(callApiAsync, /* API params */)),
+  })
+
+  current = iterator.next(/* Fake API response */)
+  assert.deepEqual(current, {
+    done: false,
+    value: put(loadSuccess(/* Fake API response */)),
+  })
+
+  current = iterator.next()
+  assert.deepEqual(current, {
+    done: true,
+    value: undefined,
+  })
+
+  assert.end()
+})
+```
