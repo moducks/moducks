@@ -1,5 +1,6 @@
 import test from 'tape'
 import { createModule } from '../src'
+import { ActionTypes } from 'redux/lib/createStore'
 
 const defaultState = { counter: 2 }
 
@@ -16,6 +17,15 @@ const { myCounter, add, subtract } = createModule('myCounter', {
   },
 
 }, defaultState)
+
+test('[Reducer] it should return defaultState', assert => {
+
+  const actual = myCounter(undefined, { type: ActionTypes.INIT })
+  const expected = defaultState
+
+  assert.equal(expected, actual)
+  assert.end()
+})
 
 test('[Reducer] it should add 1', assert => {
 

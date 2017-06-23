@@ -18,17 +18,6 @@ const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule',
 
 }, {})
 
-test('[Reducer] it should create a noop reducer', assert => {
-
-  const state = {}
-
-  const actual = myModule(state, { type: 'myModule/ACTION_ONE' })
-  const expected = state
-
-  assert.equal(expected, actual)
-  assert.end()
-})
-
 test('[Reducer] it should create an action creator from function form', assert => {
 
   const action = actionOne('foo', 'bar')
