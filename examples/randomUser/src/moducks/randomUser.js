@@ -8,7 +8,7 @@ const defaultState = {
   pendingCounts: 0,
 }
 
-const fetchRandomUser = async () => {
+export const fetchRandomUser = async () => {
 
   await delay((0.3 + Math.random()) * 1000)
 
