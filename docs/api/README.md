@@ -105,7 +105,7 @@ const subtract = payload => ({ type: 'myCounter/SUBTRACT', payload })
 - If you specify `saga` as **a generator function**, it will be a short circuit for [`redux-saga/effects.takeEvery()`](https://github.com/redux-saga/redux-saga/tree/master/docs/api#takeeverypattern-saga-args).  
 It also converts...
   - **`return <SuccessAction>`** :arrow_right: **`yield put(<SuccessAction>)`**
-  - **`throw <Error>`** :arrow_right: **`onError(<Error>, <Action>)`** :arrow_right: **`yield put(<SuccessAction>)`**  
+  - **`throw <Error>`** :arrow_right: **`onError(<Error>, <Action>)`** :arrow_right: **`return <FailureAction>`** :arrow_right: **`yield put(<FailureAction>)`**  
 
     Note that `onError` can be both of a generator function and a normal function.  
 
