@@ -7,8 +7,6 @@
 
 [Ducks](https://github.com/erikras/ducks-modular-redux) ([Redux] Reducer Bundles) + [Redux-Saga] = **Moducks**
 
-**WARNING: The project is still under development! There are no stable releases!**
-
 ## Getting Started
 
 ### Installing
