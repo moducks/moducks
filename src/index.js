@@ -1,6 +1,6 @@
 import { createAction, handleActions } from 'redux-actions'
+import { fork, put, spawn, takeEvery, takeLatest, throttle } from 'redux-saga/effects'
 import camelCase from 'redux-actions/lib/camelCase'
-import { takeEvery, takeLatest, throttle, fork, spawn, put } from 'redux-saga/effects'
 
 const IO = '@@redux-saga/IO'
 
@@ -44,7 +44,7 @@ const enhanceThunk = onError => saga => function* (...args) {
     if (!onError) {
       throw e
     }
-    const result = isGeneratorFunction(onError) ? (yield* onError(e, ...args)) : onError(e, ...args)
+    const result = isGeneratorFunction(onError) ? yield* onError(e, ...args) : onError(e, ...args)
     if (result !== undefined) {
       yield put(result)
     }
@@ -78,7 +78,7 @@ const createModuleWithApp = (
 
     reducer && (reducerMap[actionType] = reducer)
     actions[type] = actionType
-    actionCreators[camelType] = createAction(actionType, ...(Array.isArray(creator) ? creator : [ creator ]))
+    actionCreators[camelType] = createAction(actionType, ...Array.isArray(creator) ? creator : [ creator ])
 
     if (isGeneratorFunction(saga)) {
       sagas[camelType] = takeEvery(actionType, enhanceThunk(onError)(saga))

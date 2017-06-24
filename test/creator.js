@@ -1,7 +1,7 @@
 import test from 'tape'
 import { createModule } from '../src'
 
-const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule', {
+const { actionOne, actionTwo, actionThree } = createModule('myModule', {
 
   ACTION_ONE: {
     creator: (key, value) => ({ [key]: value }),
@@ -9,7 +9,7 @@ const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule',
 
   ACTION_TWO: {
     creator: [
-      (first) => [first],              // payload
+      first => [first],                // payload
       (first, second) => ({ second }), // meta
     ],
   },

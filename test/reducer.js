@@ -1,10 +1,10 @@
 import test from 'tape'
-import { createModule } from '../src'
 import { ActionTypes } from 'redux/lib/createStore'
+import { createModule } from '../src'
 
 const defaultState = { counter: 2 }
 
-const { myCounter, add, subtract } = createModule('myCounter', {
+const { myCounter } = createModule('myCounter', {
 
   // function form
   ADD: (state, action) => ({ counter: state.counter + action.payload }),

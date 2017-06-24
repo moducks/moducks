@@ -40,7 +40,7 @@ const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule',
   // array form
   ACTION_TWO: {
     creator: [
-      (first) => [first],              // payload
+      first => [first],                // payload
       (first, second) => ({ second }), // meta
     ],
   },
@@ -233,7 +233,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
     actionBar: takeEvery(function* () {
       /* ... */
     }),
-  }
+  },
   actionFoo: (payload) => { /* ... */ },
   actionBar: (payload) => { /* ... */ },
   ACTION_FOO: 'myModule/ACTION_FOO',
@@ -287,7 +287,7 @@ flattenSagas(
     undefined,
     0,
     Symbol('baz'),
-    x => 1,
+    x => x + 1,
     {
       i: [
         spawn(function* () { }),

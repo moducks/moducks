@@ -1,4 +1,4 @@
-import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import { flattenSagas } from '../../../es'
 import createSagaMiddleware from 'redux-saga'
 

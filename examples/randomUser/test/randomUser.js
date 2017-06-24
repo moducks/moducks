@@ -88,7 +88,7 @@ test('randomUser: sagas: load->loadSuccess', assert => {
   current = iterator.next({ name: 'Mary' })
   assert.deepEqual(current, {
     done: false,
-    value: put(loadSuccess({ name: 'Mary' }))
+    value: put(loadSuccess({ name: 'Mary' })),
   })
 
   current = iterator.next()

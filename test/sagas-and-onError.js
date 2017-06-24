@@ -1,7 +1,7 @@
 import test from 'tape'
-import { createStore, combineReducers, applyMiddleware } from 'redux'
+import { applyMiddleware, createStore } from 'redux'
 import createSagaMiddleware, { delay, END } from 'redux-saga'
-import { fork, spawn, call, take, takeEvery } from 'redux-saga/effects'
+import { call, fork, spawn, take, takeEvery } from 'redux-saga/effects'
 import { createModule, flattenSagas, retrieveWorkers } from '../src'
 
 function configureStore(reducer, sagas) {
@@ -17,7 +17,7 @@ function configureStore(reducer, sagas) {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
       yield flattenSagas(sagas)
-    }).done
+    }).done,
   }
 }
 
@@ -36,7 +36,7 @@ test('[Sagas and onError] it should automatically wrapped by enhanced takeEvery'
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
     REQUEST: {
       saga: function* (action) {
         events.push(`run request: ${action.payload}`)
@@ -47,7 +47,7 @@ test('[Sagas and onError] it should automatically wrapped by enhanced takeEvery'
       onError: (e, action) => {
         events.push(`trigger onError: ${e} ${action.payload}`)
         return requestFailure(e)
-      }
+      },
     },
     REQUEST_SUCCESS: (state, action) => {
       events.push(`trigger request success: ${action.payload}`)
@@ -86,7 +86,7 @@ test('[Sagas and onError] it should work with enhanced takeEvery', assert => {
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
     REQUEST: {
       saga: ({ type, takeEvery }) => takeEvery(type, function* (action) {
         events.push(`run request: ${action.payload}`)
@@ -97,7 +97,7 @@ test('[Sagas and onError] it should work with enhanced takeEvery', assert => {
       onError: (e, action) => {
         events.push(`trigger onError: ${e} ${action.payload}`)
         return requestFailure(e)
-      }
+      },
     },
     REQUEST_SUCCESS: (state, action) => {
       events.push(`trigger request success: ${action.payload}`)
@@ -136,10 +136,10 @@ test('[Sagas and onError] it should work with enhanced fork', assert => {
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
     REQUEST: {
       saga: ({ type, fork }) => function* () {
-        while (true) {
+        while (true) { // eslint-disable-line no-constant-condition
           const action = yield take(type)
           yield fork(function* () {
             events.push(`run request: ${action.payload}`)
@@ -152,7 +152,7 @@ test('[Sagas and onError] it should work with enhanced fork', assert => {
       onError: (e, action) => {
         events.push(`trigger onError: ${e} ${action.payload}`)
         return requestFailure(e)
-      }
+      },
     },
     REQUEST_SUCCESS: (state, action) => {
       events.push(`trigger request success: ${action.payload}`)
@@ -191,10 +191,10 @@ test('[Sagas and onError] it should work with manually enhanced generator', asse
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, request, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
     REQUEST: {
       saga: ({ type, enhance }) => function* () {
-        while (true) {
+        while (true) { // eslint-disable-line no-constant-condition
           const action = yield take(type)
           yield fork(enhance(function* () {
             events.push(`run request: ${action.payload}`)
@@ -207,7 +207,7 @@ test('[Sagas and onError] it should work with manually enhanced generator', asse
       onError: (e, action) => {
         events.push(`trigger onError: ${e} ${action.payload}`)
         return requestFailure(e)
-      }
+      },
     },
     REQUEST_SUCCESS: (state, action) => {
       events.push(`trigger request success: ${action.payload}`)
@@ -262,7 +262,7 @@ test('[Sagas and onError] it should bundle additional sagas', assert => {
     },
     BAR: {
       saga: () => expected1.bar,
-    }
+    },
   }, {}, {
     baz: expected1.baz,
     qux: spawn(expected1.qux),

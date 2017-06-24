@@ -1,6 +1,6 @@
 import test from 'tape'
-import { takeEvery, takeLatest, throttle, fork, spawn } from 'redux-saga/effects'
-import { flattenSagas, retrieveWorkers, createApp } from '../src'
+import { fork, spawn, takeEvery, takeLatest, throttle } from 'redux-saga/effects'
+import { createApp, flattenSagas, retrieveWorkers } from '../src'
 
 test('[Extras] it should flatten nested objects and arrays into a flat array of redux-saga effects', assert => {
 
@@ -33,7 +33,7 @@ test('[Extras] it should flatten nested objects and arrays into a flat array of 
       undefined,
       0,
       Symbol('baz'),
-      x => 1,
+      x => x + 1,
       {
         i: [
           expected[4],

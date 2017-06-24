@@ -35,7 +35,7 @@ export const {
 } = createModule('randomUser', {
 
   LOAD: {
-    reducer: (state) => ({
+    reducer: state => ({
       ...state,
       pendingCounts: state.pendingCounts + 1,
     }),
@@ -57,7 +57,7 @@ export const {
     pendingCounts: state.pendingCounts - 1,
   }),
 
-  CLEAR: (state) => ({
+  CLEAR: state => ({
     ...state,
     users: [],
     errors: [],
