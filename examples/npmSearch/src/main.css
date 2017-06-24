@@ -1,0 +1,76 @@
+* {
+  box-sizing: border-box;
+}
+
+.flex {
+  display: flex;
+}
+.divider {
+  width: 100vw;
+}
+.hidden {
+  display: none;
+}
+
+.column {
+  padding: 30px;
+}
+.columnLeft {
+  width: 45%;
+}
+.columnRight {
+  width: 55%;
+}
+
+.npm {
+  width: 30%;
+  height: 50px;
+  margin: 10px;
+}
+.input {
+  background: silver;
+  padding: 5px;
+  width: 70%;
+  font-size: 30px;
+}
+
+.scroll {
+  margin: 20px auto;
+  width: 100%;
+  position: relative;
+}
+.scrollSpinner {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+.scrollSpinner.active {
+  display: flex;
+  background: rgba(0, 43, 54, 0.9);
+}
+.scrollItem {
+  min-height: 120px;
+  background-color: rgb(7, 112, 96);
+  border-color: rgb(7, 75, 112);
+  color: rgb(188, 198, 214);
+  padding: 10px;
+  margin: 8px;
+}
+.scrollItemName {
+  display: block;
+  font-size: 28px;
+  color: rgb(188, 198, 214);
+}
+.scrollItemDescription {
+  padding-left: 10px;
+}
+.scrollEnd {
+  color: rgb(188, 198, 214);
+  text-align: right;
+}
