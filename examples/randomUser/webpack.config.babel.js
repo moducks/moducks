@@ -11,12 +11,8 @@ export default {
     rules: [
       {
         test: /\.jsx?$/,
-        include: [
-          path.resolve(__dirname, 'src'),
-        ],
-        use: {
-          loader: 'babel-loader',
-        },
+        include: path.resolve(__dirname, 'src'),
+        loaders: ['babel-loader'],
       },
     ],
   },
