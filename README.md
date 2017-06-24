@@ -56,7 +56,7 @@ export const fetchRandomUser = async () => {
 Without moducks, you have to define lengthy definitions for each module.
 
 ```javascript
-import { put, call, takeEvery } from 'redux-saga/effects'
+import { call, put, takeEvery } from 'redux-saga/effects'
 import { fetchRandomUser } from '../api'
 
 const LOAD = 'randomUser/LOAD'
@@ -65,8 +65,8 @@ const LOAD_FAILURE = 'randomUser/LOAD_FAILURE'
 const CLEAR = 'randomUser/CLEAR'
 
 export const load = () => ({ type: LOAD })
-const loadSuccess = (data) => ({ type: LOAD_SUCCESS, payload: data })
-const loadFailure = (error) => ({ type: LOAD_FAILURE, payload: error, error: true })
+const loadSuccess = data => ({ type: LOAD_SUCCESS, payload: data })
+const loadFailure = error => ({ type: LOAD_FAILURE, payload: error, error: true })
 export const clear = () => ({ type: CLEAR })
 
 const defaultState = {
@@ -142,7 +142,7 @@ const {
 } = createModule('randomUser', {
 
   LOAD: {
-    reducer: (state) => ({
+    reducer: state => ({
       ...state,
       pendingCounts: state.pendingCounts + 1,
     }),
