@@ -162,7 +162,7 @@ const {
     pendingCounts: state.pendingCounts - 1,
   }),
 
-  CLEAR: (state) => ({
+  CLEAR: state => ({
     ...state,
     users: [],
     errors: [],
