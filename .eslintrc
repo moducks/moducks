@@ -14,7 +14,22 @@
     "react"
   ],
   "rules": {
+    "arrow-parens": ["error", "as-needed"],
+    "comma-dangle": ["error", "always-multiline"],
+    "comma-style": ["error", "last"],
+    "eqeqeq": ["error", "always", {"null": "ignore"}],
+    "guard-for-in": "error",
+    "no-duplicate-imports": "error",
+    "no-extra-parens": "error",
+    "no-lone-blocks": "error",
+    "no-trailing-spaces": "error",
+    "no-var": "error",
+    "no-void": "error",
+    "no-with": "error",
+    "prefer-const": "error",
+    "prefer-spread": "error",
     "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error"
+    "react/jsx-uses-vars": "error",
+    "yield-star-spacing": ["error", "after"]
   }
 }
