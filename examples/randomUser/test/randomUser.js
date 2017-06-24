@@ -74,7 +74,7 @@ test('randomUser: reducer', assert => {
   assert.end()
 })
 
-test('randomUser: sagas: loadSaga (Success)', assert => {
+test('randomUser: sagas: load->loadSuccess', assert => {
 
   const iterator = retrieveWorkers(sagas).load(load())
   let current
@@ -100,7 +100,7 @@ test('randomUser: sagas: loadSaga (Success)', assert => {
   assert.end()
 })
 
-test('randomUser: sagas: loadSaga (Failure)', assert => {
+test('randomUser: sagas: load->loadFailure', assert => {
 
   const iterator = retrieveWorkers(sagas).load(load())
   let current
