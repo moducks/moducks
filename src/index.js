@@ -1,5 +1,5 @@
 import { createAction, handleActions } from 'redux-actions'
-import { fork, put, spawn, takeEvery, takeLatest, throttle } from 'redux-saga/effects'
+import { fork, put, select, spawn, takeEvery, takeLatest, throttle } from 'redux-saga/effects'
 import camelCase from 'redux-actions/lib/camelCase'
 
 const IO = '@@redux-saga/IO'
@@ -113,6 +113,7 @@ const createModuleWithApp = (
   return {
     [moduleName]: handleActions(reducerMap, defaultState),
     sagas,
+    selectModule: () => select(state => state[moduleName]),
     ...actionCreators,
     ...actions,
   }

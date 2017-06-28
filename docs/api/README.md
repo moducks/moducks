@@ -108,24 +108,30 @@ It also converts...
   - **`return <SuccessAction>`** :arrow_right: **`yield put(<SuccessAction>)`**
   - **`throw <Error>`** :arrow_right: **`onError(<Error>, <Action>)`** :arrow_right: **`return <FailureAction>`** :arrow_right: **`yield put(<FailureAction>)`**  
 
-    Note that `onError` can be both of a generator function and a normal function.  
-
 - As an another choice, use **a thunk that returns either generator function or effect.**  
 You can use another enhanced effect creator by receiving  
   **`({ type, takeEvery, takeLatest, throttle, fork, spawn })` as the first argument**.  
   - Returned generator function is automatically invoked by **non-enhanced `fork()`**.  
   - When you use enhanced `fork` or `spawn`, **pass `<Action>` as a second argument** to receive it in `onError`.
 
-- As the last choice, create your original enhanced effect by receiving `({ type, enhance })`.
+- As the last choice, manually enhance your generator function by receiving `({ enhance })`.
+
+**NOTE:**
+- `onError` can be both of a normal function or a generator function.
+- `selectModule` is provided as an alias of `select(state => state[moduleName])`.
 
 The following five snippets have the same behaviors.
 
 ```js
-const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCancel } = createModule('myClient', {
 
   // use enhanced takeEvery automatically
   REQUEST: {
     saga: function* (action) {
+      const { cancelTokenSource } = yield selectModule()
+      if (cancelTokenSource) {
+        yield requestCancel(cancelTokenSource)
+      }
       return requestSuccess(yield call(callApiAsync, action.payload))
     },
     onError: (e, action) => requestFailure(e),
@@ -133,16 +139,21 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+  REQUEST_CANCEL: {},
 
 }, {})
 ```
 
 ```js
-const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCancel } = createModule('myClient', {
 
   // use enhanced takeEvery manually
   REQUEST: {
     saga: ({ type, takeEvery }) => takeEvery(type, function* (action) {
+      const { cancelTokenSource } = yield selectModule()
+      if (cancelTokenSource) {
+        yield requestCancel(cancelTokenSource)
+      }
       return requestSuccess(yield call(callApiAsync, action.payload))
     }),
     onError: (e, action) => requestFailure(e),
@@ -150,12 +161,13 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+  REQUEST_CANCEL: {},
 
 }, {})
 ```
 
 ```js
-const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+const { myClient, sagas, selectModule, requestSuccess, requestFailure } = createModule('myClient', {
 
   // use enhanced fork
   // (you should pass action as a second argument of fork() to receive it in onError)
@@ -164,6 +176,10 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
       while (true) {
         const action = yield take(type)
         yield fork(function* () {
+          const { cancelTokenSource } = yield selectModule()
+          if (cancelTokenSource) {
+            yield requestCancel(cancelTokenSource)
+          }
           return requestSuccess(yield call(callApiAsync, action.payload))
         }, action)
       }
@@ -173,12 +189,13 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+  REQUEST_CANCEL: {},
 
 }, {})
 ```
 
 ```js
-const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+const { myClient, sagas, selectModule, requestSuccess, requestFailure } = createModule('myClient', {
 
   // enhance your generator manually
   // (you should pass action as a second argument of fork() to receive it in onError)
@@ -187,6 +204,10 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
       while (true) {
         const action = yield take(type)
         yield fork(enhance(function* () {
+          const { cancelTokenSource } = yield selectModule()
+          if (cancelTokenSource) {
+            yield requestCancel(cancelTokenSource)
+          }
           return requestSuccess(yield call(callApiAsync, action.payload))
         }), action)
       }
@@ -196,6 +217,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClie
 
   REQUEST_SUCCESS: {},
   REQUEST_FAILURE: {},
+  REQUEST_CANCEL: {},
 
 }, {})
 ```
@@ -208,6 +230,10 @@ const sagas = {
   // without moducks
   load: takeEvery('myClient/REQUEST', function* (action) {
     try {
+      const { cancelTokenSource } = yield select(state => state.myClient)
+      if (cancelTokenSource) {
+        yield put(requestCancel(cancelTokenSource))
+      }
       yield put(requestSuccess(yield call(callApiAsync, action.payload)))
     } catch (e) {
       yield put(requestFailure(e))
@@ -218,6 +244,7 @@ const sagas = {
 
 const requestSuccess = payload => ({ type: 'myClient/REQUEST_SUCCESS', payload })
 const requestFailure = payload => ({ type: 'myClient/REQUEST_FAILURE', payload })
+const requestCancel = payload => ({ type: 'myClient/REQUEST_CANCEL', payload })
 ```
 
 ### Return Value
@@ -235,6 +262,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
       /* ... */
     }),
   },
+  selectModule: () => select(state => state.myClient),
   actionFoo: (payload) => { /* ... */ },
   actionBar: (payload) => { /* ... */ },
   ACTION_FOO: 'myModule/ACTION_FOO',
