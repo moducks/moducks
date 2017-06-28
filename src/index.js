@@ -31,23 +31,34 @@ const enhancibleForkerThunks = {
   fork: enhance => (fn, ...args) => fork(enhance(fn), ...args),
   spawn: enhance => (fn, ...args) => spawn(enhance(fn), ...args),
 }
+const putYields = function* (g) {
+  let { value, done } = g.next()
+  while (!done) {
+    if (!value || !value[IO]) {
+      value = put(value)
+    }
+    ({ value, done } = g.next(yield value))
+  }
+  return value
+}
+const putReturn = function* (value) {
+  if (value !== undefined) {
+    yield put(value)
+  }
+}
 const enhanceThunk = onError => saga => function* (...args) {
   if (!isGeneratorFunction(saga)) {
     throw new Error('Enhanced target must be generator function.')
   }
   try {
-    const result = yield* saga(...args)
-    if (result !== undefined) {
-      yield put(result)
-    }
+    yield* putReturn(yield* putYields(saga(...args)))
   } catch (e) {
-    if (!onError) {
-      throw e
-    }
-    const result = isGeneratorFunction(onError) ? yield* onError(e, ...args) : onError(e, ...args)
-    if (result !== undefined) {
-      yield put(result)
-    }
+    if (!onError) throw e
+    yield* putReturn(
+      isGeneratorFunction(onError)
+      ? yield* putYields(onError(e, ...args))
+      : onError(e, ...args)
+    )
   }
 }
 

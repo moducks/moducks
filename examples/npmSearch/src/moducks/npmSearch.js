@@ -1,5 +1,5 @@
 import { createModule } from '../../../../es'
-import { call, put, select } from 'redux-saga/effects'
+import { call, select } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 import axios, { CancelToken } from 'axios'
 import * as api from '../api'
@@ -25,7 +25,7 @@ export const {
       const state = yield select(state => state.npmSearch)
       if (state.pending) {
         // if previous request is remaining, cancel it
-        yield put(loadCancel(state.cancelTokenSource))
+        yield loadCancel(state.cancelTokenSource)
       }
       yield call(delay, 500)
       // dispatch LOAD after 0.5 seconds passed with no text input changes
