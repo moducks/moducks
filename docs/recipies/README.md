@@ -2,7 +2,6 @@
 
 * [Define pre-prefixed `createModule()`](#define-pre-prefixed-createmodule)
 * [Export moducks](#export-moducks)
-* [Define complicated sagas](#define-complicated-sagas)
 * [Define `configureStore()`](#define-configurestore)
 * [Testing with `retrieveWorkers()`](#testing-with-retrieveworkers)
 
@@ -33,7 +32,7 @@ import { createModule } from '../app'
 export const { barModule, /* ... */ } = createModule('barModule', { /* ... */ }, {})
 ```
 
-*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState, additionalSagas = {})`](../api#createappappnamemodulename-definitions-defaultstate-additionalsagas--)*
+*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState = {}, options = {})`](../api#createappappnamemodulename-definitions-defaultstate---options--)*
 
 ## Export moducks
 
@@ -77,41 +76,7 @@ export const {
 } = createModule('myClient', { /* ... */ }, {})
 ```
 
-*cf. [API Reference - `createModule(moduleName, definitions, defaultState)` - ReturnValue](../api#return-value)*
-
-## Define complicated sagas
-
-If you need to define complicated sagas corresponding to multiple actions, pass them as the fourth argument of [`createModule()`](../api#createmodulemodulename-definitions-defaultstate-additionalsagas). They are automatically invoked by `fork()`.
-
-```js
-const defaultState =  {
-  running: false,
-  elapsed: 0,
-}
-
-export const {
-  timer, sagas,
-  start, stop, tick,
-  START, STOP, TICK,
-} = createModule('timer', {
-
-  START: state => ({ ...state, running: true }),
-  STOP: state => ({ ...state, running: false }),
-  TICK: state => ({ ...state, elapsed: state.elapsed + 1 }),
-
-}, defaultState, {
-
-  worker: function* () {
-    while (true) {
-      const action = yield take(START)
-      while ((yield race({ tick: delay(1000), stop: take(STOP) })).tick) {
-        yield put(tick())
-      }
-    }
-  },
-
-})
-```
+*cf. [API Reference - `createModule(moduleName, definitions, defaultState = {}, options = {})` - ReturnValue](../api#return-value)*
 
 The FORK effect from additional generator function `worker()` is also accessible as `sagas.worker`.
 
