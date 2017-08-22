@@ -33,8 +33,9 @@
   },
   "homepage": "https://github.com/moducks/moducks#readme",
   "dependencies": {
-    "redux-actions": "^2.0.3",
-    "redux-saga": "^0.15.3"
+    "redux-actions": "^2.2.1",
+    "redux-saga": "^0.15.6",
+    "reselect": "^3.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
