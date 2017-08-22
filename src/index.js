@@ -1,5 +1,6 @@
 import { createAction, handleActions } from 'redux-actions'
 import { fork, put, select, spawn, takeEvery, takeLatest, throttle } from 'redux-saga/effects'
+import { createSelector, defaultMemoize, createSelectorCreator, createStructuredSelector } from 'reselect'
 import camelCase from 'redux-actions/lib/camelCase'
 
 const IO = '@@redux-saga/IO'
@@ -16,13 +17,7 @@ const isNormalFunction = obj => {
   if (!obj || !obj.constructor) return false
   return obj.constructor.name === 'Function' || obj.constructor.displayName === 'Function'
 }
-
 const isForkEffect = obj => obj && obj[IO] && obj.FORK
-const toForkEffect = (value, msg) => {
-  if (isGeneratorFunction(value)) return fork(value)
-  if (isForkEffect(value)) return value
-  throw new Error(msg)
-}
 
 const enhancibleForkerThunks = {
   takeEvery: enhance => (patternOrChannel, worker, ...args) => takeEvery(patternOrChannel, enhance(worker), ...args),
@@ -48,7 +43,7 @@ const putReturn = function* (value) {
 }
 const enhanceThunk = onError => saga => function* (...args) {
   if (!isGeneratorFunction(saga)) {
-    throw new Error('Enhanced target must be generator function.')
+    throw new Error('Enhanced target must be a generator function.')
   }
   try {
     yield* putReturn(yield* putYields(saga(...args)))
@@ -61,12 +56,18 @@ const enhanceThunk = onError => saga => function* (...args) {
     )
   }
 }
+const enhancedForkWithoutOnError = enhancibleForkerThunks['fork'](enhanceThunk(null))
+const toForkEffect = (value, msg) => {
+  if (isGeneratorFunction(value)) return enhancedForkWithoutOnError(value)
+  if (isForkEffect(value)) return value
+  throw new Error(msg)
+}
 
 const createModuleWithApp = (
   moduleName,
   definitions,
   defaultState,
-  additionalSagas,
+  options,
   appName,
 ) => {
 
@@ -75,6 +76,19 @@ const createModuleWithApp = (
   const actions = {}
   const actionCreators = {}
   const sagas = {}
+  const selectors = { selectModule: state => state[moduleName] }
+
+  if (isNormalFunction(options.selectorFactory)) {
+    Object.assign(selectors, options.selectorFactory({ selectModule: selectors.selectModule, createSelector, defaultMemoize, createSelectorCreator, createStructuredSelector }))
+    for (const [key, value] of Object.entries(selectors)) {
+      if (!isNormalFunction(value)) throw new Error(`Invalid selector entry ${key}: It must be a function.`)
+      value.effect = (...args) => select(value, ...args)
+    }
+  } else if (options.selectorFactory) {
+    throw new Error('Invalid option selectorFactory: It must be a function that returns selector definitions.')
+  } else {
+    selectors.selectModule.effect = (...args) => select(selectors.selectModule, ...args)
+  }
 
   for (const [type, definition] of Object.entries(definitions)) {
 
@@ -99,28 +113,66 @@ const createModuleWithApp = (
         type: actionType,
         ...mapValues(enhancibleForkerThunks, value => value(enhance)),
         enhance,
+        ...selectors,
       })
-      sagas[camelType] = toForkEffect(returnValue, 'Invalid saga: Non-generator function must return generator function or redux-saga FORK effect.')
+      sagas[camelType] = toForkEffect(returnValue,
+        `Invalid saga for action ${actionType}: Non-generator function must return one of them: \n` +
+        '  - generator function (=> automatically invoked by ENHANCED fork())\n' +
+        '  - redux-saga FORK effect',
+      )
+    } else if (isForkEffect(saga)) {
+      sagas[camelType] = saga
     } else if (saga) {
-      throw new Error('Invalid saga: Saga must be specified as generator function or thunk that returns either redux-saga FORK effect or generator function.')
+      throw new Error(
+        `Invalid saga for action ${actionType}: It must be specified as one of them: \n` +
+        '  - generator function (=> automatically invoked by ENHANCED takeEvery())\n' +
+        '  - thunk that returns generator function (=> automatically invoked by RAW fork())\n' +
+        '  - thunk that returns redux-saga FORK effect\n' +
+        '  - redux-saga FORK effect'
+      )
     }
   }
 
-  for (const [camelType, saga] of Object.entries(additionalSagas)) {
-    sagas[camelType] = toForkEffect(saga, 'Invalid saga: Each of additional sagas must be generator function or redux-saga FORK effect.')
+  for (const [type, saga] of Object.entries(options.sagas || {})) {
+    if (isGeneratorFunction(saga)) {
+      sagas[type] = fork(enhanceThunk(null)(saga))
+    } else if (isNormalFunction(saga)) {
+      const enhance = enhanceThunk(null)
+      const returnValue = saga({
+        ...actions,
+        ...mapValues(enhancibleForkerThunks, value => value(enhance)),
+        enhance,
+        ...selectors,
+      })
+      sagas[type] = toForkEffect(returnValue,
+        `Invalid additional saga ${type}: Non-generator function must return one of them: \n` +
+        '  - generator function (=> automatically invoked by RAW fork())\n' +
+        '  - redux-saga FORK effect'
+      )
+    } else if (isForkEffect(saga)) {
+      sagas[type] = saga
+    } else if (saga) {
+      throw new Error(
+        `Invalid additional saga ${type}: It must be specified as one of them: \n` +
+        '  - generator function (=> automatically invoked by ENHANCED fork())\n' +
+        '  - thunk that returns generator function (=> automatically invoked by RAW fork())\n' +
+        '  - thunk that returns redux-saga FORK effect\n' +
+        '  - redux-saga FORK effect'
+      )
+    }
   }
 
   return {
     [moduleName]: handleActions(reducerMap, defaultState),
     sagas,
-    selectModule: () => select(state => state[moduleName]),
     ...actionCreators,
     ...actions,
+    ...selectors,
   }
 }
 
-export const createModule = (moduleName, definitions, defaultState, additionalSagas = {}) => createModuleWithApp(moduleName, definitions, defaultState, additionalSagas)
-export const createApp = appName => (moduleName, definitions, defaultState, additionalSagas = {}) => createModuleWithApp(moduleName, definitions, defaultState, additionalSagas, appName)
+export const createModule = (moduleName, definitions, defaultState = {}, options = {}) => createModuleWithApp(moduleName, definitions, defaultState, options)
+export const createApp = appName => (moduleName, definitions, defaultState = {}, options = {}) => createModuleWithApp(moduleName, definitions, defaultState, options, appName)
 
 export const flattenSagas = (...sagas) => {
   const storage = []
@@ -135,7 +187,7 @@ export const flattenSagas = (...sagas) => {
 
 export const retrieveWorker = saga => {
   if (!isForkEffect(saga)) {
-    throw new Error('Invalid saga: The value must be redux-saga FORK effect.')
+    throw new Error('Invalid saga: The value must be a redux-saga FORK effect.')
   }
   for (const arg of [saga.FORK.fn, ...saga.FORK.args]) {
     if (isGeneratorFunction(arg)) return arg

@@ -1,7 +1,7 @@
 import test from 'tape'
 import { applyMiddleware, createStore } from 'redux'
 import createSagaMiddleware, { delay, END } from 'redux-saga'
-import { call, fork, spawn, take, takeEvery } from 'redux-saga/effects'
+import { call, fork, race, spawn, take, takeEvery } from 'redux-saga/effects'
 import { createModule, flattenSagas, retrieveWorkers } from '../src'
 
 function configureStore(reducer, sagas) {
@@ -242,33 +242,53 @@ test('[Sagas and onError] it should work with manually enhanced generator', asse
   store.dispatch(END)
 })
 
-test('[Sagas and onError] it should bundle additional sagas', assert => {
+test('[Sagas and onError] it should work with additional sagas', assert => {
+  assert.plan(1)
 
-  const expected1 = {
-    foo: function* s1() { },
-    bar: function* s2() { },
-    baz: function* s3() { },
-    qux: function* s4() { },
-  }
-  const expected2 = {
-    foo: takeEvery('dummy/FOO', expected1.foo),
-    bar: fork(expected1.bar),
-    baz: fork(expected1.baz),
-    qux: spawn(expected1.qux),
-  }
-  const { sagas } = createModule('dummy', {
-    FOO: {
-      saga: ({ type }) => takeEvery(type, expected1.foo),
-    },
-    BAR: {
-      saga: () => expected1.bar,
-    },
+  const events = []
+  const {
+    timer, sagas,
+    start, stop, tick, finish,
+    START, STOP, TICK,
+  } = createModule('timer', {
+
+    START: {},
+    STOP: {},
+    TICK: {},
+    FINISH: (state, action) => events.push('finish loop'),
+
   }, {}, {
-    baz: expected1.baz,
-    qux: spawn(expected1.qux),
+
+    sagas: {
+      worker: function* () {
+        const action = yield take(START)
+        events.push('start loop')
+        while ((yield race({ tick: take(TICK), stop: take(STOP) })).tick) {
+          events.push('looping')
+        }
+        return finish()
+      },
+    },
+
   })
 
-  assert.deepEqual(sagas, expected2)
-  assert.deepEqual(retrieveWorkers(sagas), expected1)
-  assert.end()
+  const store = configureStore(timer, sagas)
+
+  store.runSaga().then(() => {
+    assert.deepEqual(events, [
+      'start loop',
+      'looping',
+      'looping',
+      'looping',
+      'finish loop',
+    ])
+    assert.end()
+  })
+
+  store.dispatch(start())
+  store.dispatch(tick())
+  store.dispatch(tick())
+  store.dispatch(tick())
+  store.dispatch(stop())
+  store.dispatch(END)
 })

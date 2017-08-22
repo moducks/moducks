@@ -1,16 +1,18 @@
 # API Reference
 
-* [`createModule(moduleName, definitions, defaultState, additionalSagas = {})`](#createmodulemodulename-definitions-defaultstate-additionalsagas--)
+* [`createModule(moduleName, definitions, defaultState = {}, options = {})`](#createmodulemodulename-definitions-defaultstate---options--)
   * [Arguments](#arguments)
-    * [`creator`](#creator)
-    * [`reducer`](#reducer)
-    * [`saga` `onError`](#saga-onerror)
+    * [`definitions.<NON_PREFIXED_ACTION_TYPE>.creator`](#definitionsnon_prefixed_action_typecreator)
+    * [`definitions.<NON_PREFIXED_ACTION_TYPE>.reducer`](#definitionsnon_prefixed_action_typereducer)
+    * [`definitions.<NON_PREFIXED_ACTION_TYPE>.saga`<br>`definitions.<NON_PREFIXED_ACTION_TYPE>.onError`](#definitionsnon_prefixed_action_typesagadefinitionsnon_prefixed_action_typeonerror)
+    * [`options.sagas`](#optionssagas)
+    * [`options.selectorFactory`](#optionsselectorfactory)
   * [Return Value](#return-value)
-* [`createApp(appName)(moduleName, definitions, defaultState, additionalSagas = {})`](#createappappnamemodulename-definitions-defaultstate-additionalsagas--)
+* [`createApp(appName)(moduleName, definitions, defaultState = {}, options = {})`](#createappappnamemodulename-definitions-defaultstate---options--)
 * [`flattenSagas(...sagas)`](#flattensagassagas)
-* [`retrieveWorkers(sagas)` `retrieveWorker(saga)`](#retrieveworkerssagas-retrieveworkersaga)
+* [`retrieveWorkers(sagas)`<br>`retrieveWorker(saga)`](#retrieveworkerssagas-retrieveworkersaga)
 
-## `createModule(moduleName, definitions, defaultState, additionalSagas = {})`
+## `createModule(moduleName, definitions, defaultState = {}, options = {})`
 
 Creates a ducks module.
 
@@ -19,15 +21,14 @@ Creates a ducks module.
 | # | Name | Type | Required | Description |
 |:--|:--|:--|:--:|:--|
 | 1 | **`moduleName`** | string | * | A name of its ducks. It is used for **reducer function name** and prefixing actions. |
-| 2 | **`definitions`** | Object | * | A map of each definition. **Non-prefixed action type** as key, either of the following as value.  <table><tr><th>Type</th><th>Description</th></tr><tr><td>Object</td><td>An object that can contain `creator`, `reducer`, `saga` and `onError` as key.</ld></tr><tr><td>Function</td><td>A single reducer function.</td></tr></table> |
-| 3 | **`defaultState`** | Object | * | Any objects for initializing state. |
-| 4 | `additionalSagas` | Object | | Additional generators for creating complicated sagas.<br>*cf. [Define complicated sagas](../recipies#define-complicated-sagas)* |
+| 2 | **`definitions`** | Object/Function | * | A map of each definition. **Non-prefixed action type** as key, either of the following as value.  <table><tr><th>Type</th><th>Description</th></tr><tr><td>Object</td><td>An object that can contain `creator`, `reducer`, `saga` and `onError` as key.</ld></tr><tr><td>Function</td><td>A single reducer function.</td></tr></table> |
+| 3 | `defaultState` | Object | | Any objects for initializing state. |
+| 4 | `options` | Object | | A map of extra options. <table><tr><th>Key</th><th>Description</th></tr><tr><td>sagas</td><td>Additional complicated sagas those are not associated with a single action.</td></tr><tr><td>selectorFactory</td><td>A factory function for building additonal memoized selectors.</td></tr></table> |
 
-#### `creator`
+#### `definitions.<NON_PREFIXED_ACTION_TYPE>.creator`
 
 An second argument (Function) or second to third arguments (Array of Function) of [`redux-actions.createAction()`](https://github.com/acdlite/redux-actions#createactiontype-payloadcreator--identity-metacreator).  
-It can take a single function or a pair of functions.  
-The following two snippets have the same behaviors.
+It can take a single function or a pair of functions. The following two snippets have the same behaviors.
 
 ```js
 const { myModule, actionOne, actionTwo, actionThree } = createModule('myModule', {
@@ -59,11 +60,10 @@ const actionTwo = (first, second) => ({ type: 'myModule/ACTION_TWO', payload: [f
 const actionThree = payload => ({ type: 'myModule/ACTION_THREE', payload })
 ```
 
-#### `reducer`
+#### `definitions.<NON_PREFIXED_ACTION_TYPE>.reducer`
 
 An entry of the first argument `reducerMap` of [`redux-actions.handleActions()`](https://github.com/acdlite/redux-actions/blob/master/README.md#createactionsactionmap-identityactions).  
-It can take a single stateless function.  
-The following two snippets have the same behaviors.
+It can take a single stateless function. The following two snippets have the same behaviors.
 
 ```js
 const { myCounter, add, subtract } = createModule('myCounter', {
@@ -100,25 +100,30 @@ const add = payload => ({ type: 'myCounter/ADD', payload })
 const subtract = payload => ({ type: 'myCounter/SUBTRACT', payload })
 ```
 
-#### `saga` `onError`
+#### `definitions.<NON_PREFIXED_ACTION_TYPE>.saga`<br>`definitions.<NON_PREFIXED_ACTION_TYPE>.onError`
 
-- If you specify `saga` as **a generator function**, it will be a short circuit for [`redux-saga/effects.takeEvery()`](https://github.com/redux-saga/redux-saga/tree/master/docs/api#takeeverypattern-saga-args).  
-It also converts...
-  - **`yield <Action>`** :arrow_right: **`yield put(<Action>)`**
-  - **`return <SuccessAction>`** :arrow_right: **`yield put(<SuccessAction>)`**
-  - **`throw <Error>`** :arrow_right: **`onError(<Error>, <Action>)`** :arrow_right: **`return <FailureAction>`** :arrow_right: **`yield put(<FailureAction>)`**  
+Moducks supports some shorthands for composing sagas with an error handler: `onError` (normal function or generator function).
 
-- As an another choice, use **a thunk that returns either generator function or effect.**  
-You can use another enhanced effect creator by receiving  
-  **`({ type, takeEvery, takeLatest, throttle, fork, spawn })` as the first argument**.  
-  - Returned generator function is automatically invoked by **non-enhanced `fork()`**.  
-  - When you use enhanced `fork` or `spawn`, **pass `<Action>` as a second argument** to receive it in `onError`.
+- _X_: **`yield <Action>`** :arrow_right: **`yield put(<Action>)`**
+- _Y_: **`return <SuccessAction>`** :arrow_right: **`yield put(<SuccessAction>)`**
+- _Z_: **`throw <Error>`** :arrow_right: **`onError(<Error>, <Action>)`** :arrow_right: **`return <FailureAction>`** :arrow_right: **`yield put(<FailureAction>)`**  
+
+Mainly they are three strategies.
+
+- If you specify `saga` as **a generator function**, it will be automatically invoked by **enhanced  [`redux-saga/effects.takeEvery()`](https://github.com/redux-saga/redux-saga/tree/master/docs/api#takeeverypattern-saga-args)**. It supports shorthands _X_, _Y_ and _Z_.
+
+- As an another choice, use **a thunk that returns either generator function or effect.** You can use another enhanced effect creator by receiving  
+  **`({ type, takeEvery, takeLatest, throttle, fork, spawn })`**  
+  as the first argument. They support shorthands _X_, _Y_ and _Z_.
+  - If you use enhanced `fork` or `spawn`, **pass `<Action>` as the second argument** to receive it in `onError`.
+  - Returned generator function is automatically invoked by enhanced `fork()`. It supports shorthands _X_ and _Y_.
 
 - As the last choice, manually enhance your generator function by receiving `({ enhance })`.
 
-**NOTE:**
-- `onError` can be both of a normal function or a generator function.
-- `selectModule` is provided as an alias of `select(state => state[moduleName])`.
+Also there is a wrapper function of `select()`.
+
+- `selectModule` is provided as an alias of `state => state[moduleName]`.
+- `selectModule.effect` is provided as an alias of `() => select(state => state[moduleName])`.
 
 The following five snippets have the same behaviors.
 
@@ -128,7 +133,7 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCa
   // use enhanced takeEvery automatically
   REQUEST: {
     saga: function* (action) {
-      const { cancelTokenSource } = yield selectModule()
+      const { cancelTokenSource } = yield selectModule.effect()
       if (cancelTokenSource) {
         yield requestCancel(cancelTokenSource)
       }
@@ -150,7 +155,7 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCa
   // use enhanced takeEvery manually
   REQUEST: {
     saga: ({ type, takeEvery }) => takeEvery(type, function* (action) {
-      const { cancelTokenSource } = yield selectModule()
+      const { cancelTokenSource } = yield selectModule.effect()
       if (cancelTokenSource) {
         yield requestCancel(cancelTokenSource)
       }
@@ -170,13 +175,13 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCa
 const { myClient, sagas, selectModule, requestSuccess, requestFailure } = createModule('myClient', {
 
   // use enhanced fork
-  // (you should pass action as a second argument of fork() to receive it in onError)
+  // (you should pass action as the second argument of fork() to receive it in onError)
   REQUEST: {
     saga: ({ type, fork }) => function* () {
       while (true) {
         const action = yield take(type)
         yield fork(function* () {
-          const { cancelTokenSource } = yield selectModule()
+          const { cancelTokenSource } = yield selectModule.effect()
           if (cancelTokenSource) {
             yield requestCancel(cancelTokenSource)
           }
@@ -198,13 +203,13 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure } = create
 const { myClient, sagas, selectModule, requestSuccess, requestFailure } = createModule('myClient', {
 
   // enhance your generator manually
-  // (you should pass action as a second argument of fork() to receive it in onError)
+  // (you should pass action as the second argument of fork() to receive it in onError)
   REQUEST: {
     saga: ({ type, enhance }) => function* () {
       while (true) {
         const action = yield take(type)
         yield fork(enhance(function* () {
-          const { cancelTokenSource } = yield selectModule()
+          const { cancelTokenSource } = yield selectModule.effect()
           if (cancelTokenSource) {
             yield requestCancel(cancelTokenSource)
           }
@@ -247,13 +252,117 @@ const requestFailure = payload => ({ type: 'myClient/REQUEST_FAILURE', payload }
 const requestCancel = payload => ({ type: 'myClient/REQUEST_CANCEL', payload })
 ```
 
+#### `options.sagas`
+
+Use this parameter for additional complicated sagas those are not associated with a single action. Also they are three strategies.
+
+- If you specify `saga` as **a generator function**, it will be automatically invoked by **enhanced [`redux-saga/effects.fork()`](https://github.com/redux-saga/redux-saga/tree/master/docs/api#forkfn-args)**. It supports shorthands _X_ and _Y_.
+
+- As an another choice, use **a thunk that returns either generator function or effect.** You can use another enhanced effect creator by receiving  
+  **`({ NON_PREFIXED_ACTION_TYPE_0, NON_PREFIXED_ACTION_TYPE_1, ..., takeEvery, takeLatest, throttle, fork, spawn })`**  
+  as the first argument. They support shorthands _X_ and _Y_.
+  - Returned generator function is automatically invoked by enhanced `fork()`. It supports shorthands _X_ and _Y_.
+
+- As the last choice, manually enhance your generator function by receiving `({ enhance })`.
+
+**IMPORTANT:**
+- **Each effect creator cannot have error handlers.** Write `try { } catch (e) { }` blocks if you need.
+
+```js
+export const {
+  timer, sagas,
+  start, stop, tick,
+  START, STOP,
+} = createModule('timer', {
+  /* ... */
+}, /* ... */, {
+  sagas: {
+    worker: function* () {
+      while (true) {
+        const action = yield take(START)
+        while ((yield race({ tick: delay(1000), stop: take(STOP) })).tick) {
+          yield tick()
+        }
+      }
+    },
+  },
+})
+```
+
+```js
+export const {
+  timer, sagas,
+  start, stop, tick,
+} = createModule('timer', {
+  /* ... */
+}, /* ... */, {
+  sagas: {
+    worker: ({ START, STOP }) => function* () {
+      while (true) {
+        const action = yield take(START)
+        while ((yield race({ tick: delay(1000), stop: take(STOP) })).tick) {
+          yield tick()
+        }
+      }
+    },
+  },
+})
+```
+
+#### `options.selectorFactory`
+
+A factory function for building additonal memoized selectors. An object that contains following entries is passed as the first argument.
+
+| Key | Type | Description |
+|:--|:--|:--|
+| `selectModule` | Function | Shorthand of `state => state[moduleName]` |
+| `createSelector` | Function | [`reselect/createSelector()`](https://github.com/reactjs/reselect#createselectorinputselectors--inputselectors-resultfunc) |
+| `defaultMemoize` | Function | [`reselect/defaultMemoize()`](https://github.com/reactjs/reselect#defaultmemoizefunc-equalitycheck--defaultequalitycheck) |
+| `createSelectorCreator` | Function | [`reselect/createSelectorCreator()`](https://github.com/reactjs/reselect#createselectorcreatormemoize-memoizeoptions) |
+| `createStructuredSelector` | Function | [`reselect/createStructuredSelector()`](https://github.com/reactjs/reselect#createstructuredselectorinputselectors-selectorcreator--createselector) |
+
+The factory function MUST return an object that contains the following structure.
+
+```js
+{
+  selector_function_name_0: <SELECTOR_FUNCTION_0>,
+  selector_function_name_1: <SELECTOR_FUNCTION_1>,
+  ...,
+}
+```
+
+Then, moducks attaches `.effect()` on each function as a shorthand for going along with sagas.
+
+```js
+export const { selectModule, selectFoo, /* ... */ } = createModule('myModule', {
+  ACTION_FOO: {
+    saga: function* () {
+      const myModuleState = yield selectModule.effect()
+      const foo = yield selectFoo.effect()
+      /* ... */
+    },
+  },
+}, {
+  foo: {
+    1,
+  },
+}, {
+  selectorFactory: ({ selectModule, createSelector }) => ({
+    selectFoo: createSelector(selectModule, state => state.foo),
+  }),
+})
+```
+
 ### Return Value
 
 If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BAR`, the object will be:
 
 ```js
-{
-  myClient: (state, action) => { /* ... */ },
+const selectModule = () => state => state.myClient
+const selectModule.effect = select(selectModule)
+
+return {
+  myModule: (state, action) => { /* ... */ },
   sagas: {
     actionFoo: takeEvery(function* () {
       /* ... */
@@ -262,7 +371,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
       /* ... */
     }),
   },
-  selectModule: () => select(state => state.myClient),
+  selectModule,
   actionFoo: (payload) => { /* ... */ },
   actionBar: (payload) => { /* ... */ },
   ACTION_FOO: 'myModule/ACTION_FOO',
@@ -272,7 +381,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
 
 *cf. [Recipies - Export moducks](../recipies#export-moducks)*
 
-## `createApp(appName)(moduleName, definitions, defaultState, additionalSagas = {})`
+## `createApp(appName)(moduleName, definitions, defaultState = {}, options = {})`
 
 Pre-prefix your future modules with `@@${appName}`.  
 The following two snippets have the same behaviors.
@@ -340,7 +449,7 @@ It returns:
 
 *cf. [Recipies - Define `configureStore()`](../recipies#define-configurestore)*
 
-## `retrieveWorkers(sagas)` `retrieveWorker(saga)`
+## `retrieveWorkers(sagas)`<br>`retrieveWorker(saga)`
 
 Unwrap your `sagas` to retrieve worker generator functions.  
 
