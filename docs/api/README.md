@@ -359,7 +359,7 @@ If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BA
 
 ```js
 const selectModule = () => state => state.myClient
-const selectModule.effect = select(selectModule)
+const selectModule.effect = () => select(selectModule)
 
 return {
   myModule: (state, action) => { /* ... */ },
