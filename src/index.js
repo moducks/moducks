@@ -117,7 +117,7 @@ const createModuleWithApp = (
       })
       sagas[camelType] = toForkEffect(returnValue,
         `Invalid saga for action ${actionType}: Non-generator function must return one of them: \n` +
-        '  - generator function (=> automatically invoked by ENHANCED fork())\n' +
+        '  - generator function (=> automatically invoked by enhanced fork())\n' +
         '  - redux-saga FORK effect',
       )
     } else if (isForkEffect(saga)) {
@@ -125,8 +125,8 @@ const createModuleWithApp = (
     } else if (saga) {
       throw new Error(
         `Invalid saga for action ${actionType}: It must be specified as one of them: \n` +
-        '  - generator function (=> automatically invoked by ENHANCED takeEvery())\n' +
-        '  - thunk that returns generator function (=> automatically invoked by RAW fork())\n' +
+        '  - generator function (=> automatically invoked by enhanced takeEvery())\n' +
+        '  - thunk that returns generator function (=> automatically invoked by enhanced fork())\n' +
         '  - thunk that returns redux-saga FORK effect\n' +
         '  - redux-saga FORK effect'
       )
@@ -146,7 +146,7 @@ const createModuleWithApp = (
       })
       sagas[type] = toForkEffect(returnValue,
         `Invalid additional saga ${type}: Non-generator function must return one of them: \n` +
-        '  - generator function (=> automatically invoked by RAW fork())\n' +
+        '  - generator function (=> automatically invoked by enhanced fork())\n' +
         '  - redux-saga FORK effect'
       )
     } else if (isForkEffect(saga)) {
@@ -154,8 +154,8 @@ const createModuleWithApp = (
     } else if (saga) {
       throw new Error(
         `Invalid additional saga ${type}: It must be specified as one of them: \n` +
-        '  - generator function (=> automatically invoked by ENHANCED fork())\n' +
-        '  - thunk that returns generator function (=> automatically invoked by RAW fork())\n' +
+        '  - generator function (=> automatically invoked by enhanced fork())\n' +
+        '  - thunk that returns generator function (=> automatically invoked by enhanced fork())\n' +
         '  - thunk that returns redux-saga FORK effect\n' +
         '  - redux-saga FORK effect'
       )
@@ -192,6 +192,6 @@ export const retrieveWorker = saga => {
   for (const arg of [saga.FORK.fn, ...saga.FORK.args]) {
     if (isGeneratorFunction(arg)) return arg
   }
-  throw new Error('Invalid saga: GeneratorFunction not found.')
+  throw new Error('Invalid saga: Generator function not found.')
 }
 export const retrieveWorkers = sagas => mapValues(sagas, retrieveWorker)
