@@ -10,7 +10,8 @@
   * [Return Value](#return-value)
 * [`createApp(appName)(moduleName, definitions, defaultState = {}, options = {})`](#createappappnamemodulename-definitions-defaultstate---options--)
 * [`flattenSagas(...sagas)`](#flattensagassagas)
-* [`retrieveWorkers(sagas)`<br>`retrieveWorker(saga)`](#retrieveworkerssagas-retrieveworkersaga)
+* [`enhance(saga, onError)`](#enhancesaga-onerror)
+* [`enhancibleForkerThunks.*(onError)`<br>`enhancedForkers.*`](#enhancibleforkerthunksonerrorenhancedforkers)
 
 ## `createModule(moduleName, definitions, defaultState = {}, options = {})`
 
@@ -468,3 +469,50 @@ const { foo, bar, baz } = retrieveWorkers(sagas) // retrieved values are generat
 ```
 
 *cf. [Recipies - Testing with `retrieveWorkers()`](../recipies#testing-with-retrieveworkers)*
+
+## `enhance(saga, onError)`
+
+Manually enhance your generator function. Note that `onError` is optional.
+
+```js
+enhance(function* () {
+  const x = yield actionFoo()
+  return actionBar(x)
+}, e => actionOnError(e, x))
+```
+
+It is converted into:
+
+```js
+function* () {
+  try {
+    const x = yield put(actionFoo())
+    yield put(actionBar(x))
+  } catch (e) {
+    yield put(actionOnError(e, x))
+  }
+}
+```
+
+## `enhancibleForkerThunks.*(onError)`<br>`enhancedForkers.*`
+
+Collections of redux-saga effect creators those contain `takeEvery`, `takeLatest`, `throttle`, `fork` and `spawn`.
+
+- `enhancibleForkerThunks.*(onError)` is a thunk that returns an enhanced forker with a specific error handler.
+- `enhancedForkers.*` is already enhanced with an empty error handler.
+
+```js
+enhancedForkers.takeEvery(type, function*() {
+  const x = yield actionFoo()
+  return actionBar(x)
+})
+```
+
+It is converted into:
+
+```js
+takeEvery(type, function* () {
+  const x = yield put(actionFoo())
+  yield put(actionBar(x))
+})
+```
