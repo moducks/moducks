@@ -1,6 +1,6 @@
 {
   "name": "moducks",
-  "version": "0.2.0-rc.2",
+  "version": "0.2.0-rc.3",
   "main": "es/index.js",
   "module": "es/index.js",
   "scripts": {
