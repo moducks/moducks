@@ -11,7 +11,7 @@
 * [`createApp(appName)(moduleName, definitions, defaultState = {}, options = {})`](#createappappnamemodulename-definitions-defaultstate---options--)
 * [`flattenSagas(...sagas)`](#flattensagassagas)
 * [`enhance(saga, onError)`](#enhancesaga-onerror)
-* [`enhancibleForkerThunks.*(onError)`<br>`enhancedForkers.*`](#enhancibleforkerthunksonerrorenhancedforkers)
+* [`enhancibleForkerThunks.*(onError)(...args)`<br>`enhancedForkers.*(...args)`](#enhancibleforkerthunksonerrorargsenhancedforkersargs)
 
 ## `createModule(moduleName, definitions, defaultState = {}, options = {})`
 
@@ -475,26 +475,24 @@ const { foo, bar, baz } = retrieveWorkers(sagas) // retrieved values are generat
 Manually enhance your generator function. Note that `onError` is optional.
 
 ```js
-enhance(function* () {
-  const x = yield actionFoo()
-  return actionBar(x)
-}, e => actionOnError(e, x))
+enhance(function* (action) {
+  return actionBar(yield actionFoo(action.payload))
+}, (e, action) => actionOnError(e, action))
 ```
 
 It is converted into:
 
 ```js
-function* () {
+function* (action) {
   try {
-    const x = yield put(actionFoo())
-    yield put(actionBar(x))
+    yield put(actionBar(yield put(actionFoo(action.payload))))
   } catch (e) {
-    yield put(actionOnError(e, x))
+    yield put(actionOnError(e, action))
   }
 }
 ```
 
-## `enhancibleForkerThunks.*(onError)`<br>`enhancedForkers.*`
+## `enhancibleForkerThunks.*(onError)(...args)`<br>`enhancedForkers.*(...args)`
 
 Collections of redux-saga effect creators those contain `takeEvery`, `takeLatest`, `throttle`, `fork` and `spawn`.
 
@@ -502,17 +500,39 @@ Collections of redux-saga effect creators those contain `takeEvery`, `takeLatest
 - `enhancedForkers.*` is already enhanced with an empty error handler.
 
 ```js
-enhancedForkers.takeEvery(type, function*() {
-  const x = yield actionFoo()
-  return actionBar(x)
+const { takeEvery } = enhancedForkers
+
+return takeEvery(type, function* (action) {
+  return actionBar(yield actionFoo(action.payload))
 })
 ```
 
 It is converted into:
 
 ```js
-takeEvery(type, function* () {
-  const x = yield put(actionFoo())
-  yield put(actionBar(x))
+return takeEvery(type, function* (action) {
+  yield put(actionBar(yield put(actionFoo(action.payload))))
+})
+```
+
+Also,
+
+```js
+const takeEvery = enhancibleForkerThunks.takeEvery((e, action) => actionOnError(e, action))
+
+return takeEvery(type, function* (action) {
+  return actionBar(yield actionFoo(action.payload))
+})
+```
+
+It is converted into:
+
+```js
+return takeEvery(type, function* (action) {
+  try {
+    yield put(actionBar(yield put(actionFoo(action.payload))))
+  } catch (e) {
+    yield put(actionOnError(e, action))
+  }
 })
 ```
