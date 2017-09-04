@@ -2,7 +2,7 @@
   "scripts": {
     "preinstall": "npm install --prefix ../../ && npm --prefix ../../ run build",
     "start": "webpack-dev-server",
-    "test": "babel-node test/index.js | tap-spec"
+    "test": "cross-env BABEL_ENV=cjs babel-node test/index.js | tap-spec"
   },
   "dependencies": {
     "axios": "^0.16.2",
@@ -24,6 +24,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",
+    "cross-env": "^5.0.5",
     "css-loader": "^0.28.7",
     "in-publish": "^2.0.0",
     "style-loader": "^0.18.2",
