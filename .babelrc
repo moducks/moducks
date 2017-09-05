@@ -2,19 +2,11 @@
   "env": {
     "cjs": {
       "presets": [["env"]],
-      "plugins": [["transform-object-rest-spread", { "useBuiltIns": true }]]
+      "plugins": ["transform-runtime", ["transform-object-rest-spread", { "useBuiltIns": true }]]
     },
     "es": {
-      "presets": [[
-        "env",
-        {
-          "targets": {
-            "node": "current"
-          },
-          "modules": false
-        }
-      ]],
-      "plugins": [["transform-object-rest-spread", { "useBuiltIns": true }]]
+      "presets": [["env", { "modules": false }]],
+      "plugins": ["transform-runtime", ["transform-object-rest-spread", { "useBuiltIns": true }]]
     }
   }
 }
