@@ -15,8 +15,6 @@
 npm install moducks --save
 ```
 
-If you directly call `require('moducks')` without any transpilers, you also need to manually require [`babel-polyfill`](https://www.npmjs.com/package/babel-polyfill).
-
 ### Contents
 
 - [Examples](./examples)
