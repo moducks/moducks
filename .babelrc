@@ -5,15 +5,7 @@
       "plugins": [["transform-object-rest-spread", { "useBuiltIns": true }]]
     },
     "es": {
-      "presets": [[
-        "env",
-        {
-          "targets": {
-            "node": "current"
-          },
-          "modules": false
-        }
-      ]],
+      "presets": [["env", { "modules": false }]],
       "plugins": [["transform-object-rest-spread", { "useBuiltIns": true }]]
     }
   }
