@@ -24,7 +24,7 @@ const processFunction = function* (fn, ...args) {
   )
 }
 
-export const enhance = (saga, onError) => function* (...args) {
+export const enhance = (saga, onError) => function* enhancedSaga(...args) {
   try {
     yield* processFunction(saga, ...args)
   } catch (e) {
