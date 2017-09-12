@@ -359,16 +359,16 @@ export const { selectModule, selectFoo, /* ... */ } = createModule('myModule', {
 If you make a module named `myModule` and define actions `ACTION_FOO` `ACTION_BAR`, the object will be:
 
 ```js
-const selectModule = () => state => state.myClient
+const selectModule = () => state => state.myModule
 const selectModule.effect = () => select(selectModule)
 
 return {
   myModule: (state, action) => { /* ... */ },
   sagas: {
-    actionFoo: takeEvery(function* () {
+    actionFoo: takeEvery('FOO', function* (action) {
       /* ... */
     }),
-    actionBar: takeEvery(function* () {
+    actionBar: takeEvery('BAR', function* (action) {
       /* ... */
     }),
   },
