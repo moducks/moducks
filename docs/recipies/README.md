@@ -83,6 +83,11 @@ The FORK effect from additional generator function `worker()` is also accessible
 ## Define `configureStore()`
 
 ```js
+import { applyMiddleware, combineReducers, createStore } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import { all } from 'redux-saga/effects'
+import { flattenSagas } from 'moducks'
+
 function configureStore(reducers, sagas) {
 
   const sagaMiddleware = createSagaMiddleware()
@@ -96,7 +101,7 @@ function configureStore(reducers, sagas) {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
       // run all sagas!
-      yield flattenSagas(sagas)
+      yield all(flattenSagas(sagas))
     }),
   }
 }

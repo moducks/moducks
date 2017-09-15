@@ -1,6 +1,7 @@
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux'
 import { flattenSagas } from '../../../es'
 import createSagaMiddleware from 'redux-saga'
+import { all } from 'redux-saga/effects'
 
 export default function configureStore(reducers, sagas) {
 
@@ -15,7 +16,7 @@ export default function configureStore(reducers, sagas) {
   return {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
-      yield flattenSagas(sagas)
+      yield all(flattenSagas(sagas))
     }),
   }
 }

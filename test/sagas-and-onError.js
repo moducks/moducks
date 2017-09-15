@@ -1,7 +1,7 @@
 import test from 'tape'
 import { applyMiddleware, createStore } from 'redux'
 import createSagaMiddleware, { delay, END } from 'redux-saga'
-import { call, fork, race, spawn, take, takeEvery } from 'redux-saga/effects'
+import { all, call, fork, race, spawn, take, takeEvery } from 'redux-saga/effects'
 import { createModule, flattenSagas, retrieveWorkers } from '../src'
 
 function configureStore(reducer, sagas) {
@@ -16,7 +16,7 @@ function configureStore(reducer, sagas) {
   return {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
-      yield flattenSagas(sagas)
+      yield all(flattenSagas(sagas))
     }).done,
   }
 }
