@@ -2,12 +2,21 @@ import { fork, put, spawn, takeEvery, takeLatest, throttle } from 'redux-saga/ef
 import { IO, isGeneratorFunction, mapValues } from './utils'
 
 const putYields = function* (g) {
-  let { value, done } = g.next()
+  let value, done
+  try {
+    ({ value, done } = g.next())
+  } catch (e) {
+    ({ value, done } = g.throw(e))
+  }
   while (!done) {
     if (!value || !value[IO]) {
       value = put(value)
     }
-    ({ value, done } = g.next(yield value))
+    try {
+      ({ value, done } = g.next(yield value))
+    } catch (e) {
+      ({ value, done } = g.throw(e))
+    }
   }
   return value
 }
