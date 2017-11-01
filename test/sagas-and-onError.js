@@ -292,3 +292,56 @@ test('[Sagas and onError] it should work with additional sagas', assert => {
   store.dispatch(stop())
   store.dispatch(END)
 })
+
+test('[Sagas and onError] it should recover from errors', assert => {
+  assert.plan(1)
+
+  const events = []
+  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+    REQUEST: {
+      saga: function* (action) {
+        let response
+        try {
+          events.push(`run request: ${action.payload}`)
+          response = yield call(callApiAsync, action.payload)
+        } catch (e) {
+          events.push(`retry run request: ${action.payload}`)
+          response = yield call(callApiAsync, action.payload)
+        }
+        events.push(`receive response: ${response}`)
+        return requestSuccess(response)
+      },
+      onError: (e, action) => {
+        events.push(`trigger onError: ${e} ${action.payload}`)
+        return requestFailure(e)
+      },
+    },
+    REQUEST_SUCCESS: (state, action) => {
+      events.push(`trigger request success: ${action.payload}`)
+      return state
+    },
+    REQUEST_FAILURE: (state, action) => {
+      events.push(`trigger request failure: ${action.payload}`)
+      return state
+    },
+  }, {})
+
+  const store = configureStore(myClient, sagas)
+
+  store.runSaga().then(() => {
+    assert.deepEqual(events, [
+      'run request: foo1',
+      'run request: bar2',
+      'receive response: Success_foo1',
+      'trigger request success: Success_foo1',
+      'retry run request: bar2',
+      'trigger onError: Failure_bar2 bar2',
+      'trigger request failure: Failure_bar2',
+    ])
+    assert.end()
+  })
+
+  store.dispatch({ type: 'myClient/REQUEST', payload: 'foo1' })
+  store.dispatch({ type: 'myClient/REQUEST', payload: 'bar2' })
+  store.dispatch(END)
+})
