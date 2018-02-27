@@ -7,7 +7,7 @@ import {
 } from '../src/moducks/randomUser'
 import { ActionTypes } from 'redux/lib/createStore'
 import { call, put } from 'redux-saga/effects'
-import { retrieveWorkers } from '../../../es'
+import moducks from '../src/moducks/moducks'
 
 test('randomUser: creators', assert => {
 
@@ -77,7 +77,7 @@ test('randomUser: reducer', assert => {
 
 test('randomUser: sagas: load->loadSuccess', assert => {
 
-  const iterator = retrieveWorkers(sagas).load(load())
+  const iterator = moducks.util.retrieveWorkers(sagas).load(load())
   let current
 
   current = iterator.next()
@@ -103,7 +103,7 @@ test('randomUser: sagas: load->loadSuccess', assert => {
 
 test('randomUser: sagas: load->loadFailure', assert => {
 
-  const iterator = retrieveWorkers(sagas).load(load())
+  const iterator = moducks.util.retrieveWorkers(sagas).load(load())
   let current
 
   current = iterator.next()
@@ -129,7 +129,7 @@ test('randomUser: sagas: load->loadFailure', assert => {
 
 let it
 
-it = sagaHelper(retrieveWorkers(sagas).load(load()), test)
+it = sagaHelper(moducks.util.retrieveWorkers(sagas).load(load()), test)
 it('randomUser (with redux-saga-testing): sagas: load->loadSuccess (STEP 1: it should call api)', (result, assert) => {
   assert.deepEqual(result, call(fetchRandomUser))
   assert.end()
@@ -144,7 +144,7 @@ it('randomUser (with redux-saga-testing): sagas: load->loadSuccess (STEP 3: it s
   assert.end()
 })
 
-it = sagaHelper(retrieveWorkers(sagas).load(load()), test)
+it = sagaHelper(moducks.util.retrieveWorkers(sagas).load(load()), test)
 it('randomUser (with redux-saga-testing): sagas: load->loadFailure (STEP 1: it should call api)', (result, assert) => {
   assert.deepEqual(result, call(fetchRandomUser))
   assert.end()

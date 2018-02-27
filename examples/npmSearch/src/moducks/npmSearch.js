@@ -1,10 +1,10 @@
-import { createModule } from '../../../../es'
-import { call } from 'redux-saga/effects'
+import { call, select } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
 import axios, { CancelToken } from 'axios'
+import moducks from './moducks'
 import * as api from '../api'
 
-const defaultState = {
+const initialState = {
   q: null,
   pending: false,
   error: null,
@@ -15,14 +15,14 @@ const defaultState = {
 }
 
 export const {
-  npmSearch, sagas, selectModule,
+  npmSearch, sagas,
   inputChange, load, loadSuccess, loadFailure, loadCancel, clear,
-} = createModule('npmSearch', {
+} = moducks.createModule('npmSearch', {
 
   INPUT_CHANGE: {
     // observe latest text input changes
     saga: ({ type, takeLatest }) => takeLatest(type, function* ({ payload }) {
-      const state = yield selectModule.effect()
+      const state = yield select(({ npmSearch }) => npmSearch)
       if (state.pending) {
         // if previous request is remaining, cancel it
         yield loadCancel(state.cancelTokenSource)
@@ -42,7 +42,7 @@ export const {
       cancelTokenSource,
     }),
     saga: function* ({ payload: { q, cancelTokenSource } }) {
-      const state = yield selectModule.effect()
+      const state = yield select(({ npmSearch }) => npmSearch)
       // if keyword is empty string, we don't have to dispatch actual request
       if (q !== undefined && q.trim() === '') {
         return clear()
@@ -112,4 +112,4 @@ export const {
     hasMore: false,
   }),
 
-}, defaultState)
+}, initialState)
