@@ -40,7 +40,7 @@ export const {
 ```js
 // Short hand for exporting all consts including action types and module selector (Not compatible with true ducks style)
 export const {
-  myClient, sagas, selectModule,
+  myClient, sagas,
   request, requestSuccess, requestFailure,
   REQUEST, REQUEST_SUCCESS, REQUEST_FAILURE,
 } = moducks.createModule('myClient', { /* ... */ }, {})

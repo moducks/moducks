@@ -137,7 +137,7 @@ Mainly they are three strategies.
 The following five snippets have the same behaviors.
 
 ```js
-const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCancel } = moducks.createModule('myClient', {
+const { myClient, sagas, requestSuccess, requestFailure, requestCancel } = moducks.createModule('myClient', {
 
   // use enhanced takeEvery automatically
   REQUEST: {
@@ -159,7 +159,7 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCa
 ```
 
 ```js
-const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCancel } = moducks.createModule('myClient', {
+const { myClient, sagas, requestSuccess, requestFailure, requestCancel } = moducks.createModule('myClient', {
 
   // use enhanced takeEvery manually
   REQUEST: {
@@ -181,7 +181,7 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure, requestCa
 ```
 
 ```js
-const { myClient, sagas, selectModule, requestSuccess, requestFailure } = moducks.createModule('myClient', {
+const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
 
   // use enhanced fork
   // (you should pass action as the second argument of fork() to receive it in onError)
@@ -209,7 +209,7 @@ const { myClient, sagas, selectModule, requestSuccess, requestFailure } = moduck
 ```
 
 ```js
-const { myClient, sagas, selectModule, requestSuccess, requestFailure } = moducks.createModule('myClient', {
+const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
 
   // enhance your generator manually
   // (you should pass action as the second argument of fork() to receive it in onError)
