@@ -1,6 +1,6 @@
 {
   "name": "moducks",
-  "version": "0.2.3",
+  "version": "1.0.0-beta.0",
   "main": "lib/index.js",
   "module": "es/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
     "build:es": "cross-env BABEL_ENV=es babel src --out-dir es",
     "build": "run-p build:*",
-    "prepublish": "in-publish && (git diff --no-ext-diff --quiet --exit-code src .gitignore package.json README.md LICENSE || (echo \"Please commit changes!\" && false)) && npm test && npm run build || not-in-publish"
+    "prepublishOnly": "git diff --no-ext-diff --quiet --exit-code src .gitignore package.json README.md LICENSE || (echo \"Please commit changes!\" && false)) && npm test && npm run build"
   },
   "author": "rzhx",
   "contributors": [
@@ -36,22 +36,22 @@
   "homepage": "https://github.com/moducks/moducks#readme",
   "dependencies": {
     "redux-actions": "^2.2.1",
-    "redux-saga": "^0.15.6",
-    "reselect": "^3.0.1"
+    "yup": "^0.24.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^7.2.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.0",
-    "cross-env": "^5.0.5",
-    "eslint": "^4.6.1",
-    "eslint-plugin-react": "^7.3.0",
-    "in-publish": "^2.0.0",
-    "npm-run-all": "^4.1.1",
+    "babel-preset-env": "^1.6.1",
+    "cross-env": "^5.1.3",
+    "eslint": "^4.18.1",
+    "eslint-plugin-react": "^7.7.0",
+    "npm-run-all": "^4.1.2",
     "redux": "^3.7.2",
+    "redux-saga": "^0.16.0",
     "tap-spec": "^4.1.1",
-    "tape": "^4.8.0"
+    "tape": "^4.9.0"
   }
 }

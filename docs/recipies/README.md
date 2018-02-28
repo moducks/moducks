@@ -1,38 +1,8 @@
 # Recipies
 
-* [Define pre-prefixed `createModule()`](#define-pre-prefixed-createmodule)
 * [Export moducks](#export-moducks)
 * [Define `configureStore()`](#define-configurestore)
-* [Testing with `retrieveWorkers()`](#testing-with-retrieveworkers)
-
-## Define pre-prefixed `createModule()`
-
-First, define prefix using [`createApp()`](../api#createappappnamemodulename-definitions-defaultstate-additionalsagas--) to export it.
-
-```js
-// app/index.js
-import { createApp } from 'moducks'
-
-export const createModule = createApp('myApp')
-```
-
-Then import it to define each moducks.
-
-```js
-// app/moducks/fooModule.js
-import { createModule } from '../app'
-
-export const { fooModule, /* ... */ } = createModule('fooModule', { /* ... */ }, {})
-```
-
-```js
-// app/moducks/barModule.js
-import { createModule } from '../app'
-
-export const { barModule, /* ... */ } = createModule('barModule', { /* ... */ }, {})
-```
-
-*cf. [API Reference - `createApp(appName)(moduleName, definitions, defaultState = {}, options = {})`](../api#createappappnamemodulename-definitions-defaultstate---options--)*
+* [Testing with `<instance>.util.retrieveWorkers()`](#testing-with-instanceutilretrieveworkers)
 
 ## Export moducks
 
@@ -43,7 +13,7 @@ You can export it in your favorite style.
 const {
   myClient, sagas,
   request, requestSuccess, requestFailure,
-} = createModule('myClient', { /* ... */ }, {})
+} = moducks.createModule('myClient', { /* ... */ }, {})
 
 export default myClient
 export { sagas, request }
@@ -54,7 +24,7 @@ export { sagas, request }
 const {
   myClient, sagas,
   request, requestSuccess, requestFailure,
-} = createModule('myClient', { /* ... */ }, {})
+} = moducks.createModule('myClient', { /* ... */ }, {})
 
 export { myClient, sagas, request }
 ```
@@ -64,7 +34,7 @@ export { myClient, sagas, request }
 export const {
   myClient, sagas,
   request, requestSuccess, requestFailure,
-} = createModule('myClient', { /* ... */ }, {})
+} = moducks.createModule('myClient', { /* ... */ }, {})
 ```
 
 ```js
@@ -73,22 +43,29 @@ export const {
   myClient, sagas, selectModule,
   request, requestSuccess, requestFailure,
   REQUEST, REQUEST_SUCCESS, REQUEST_FAILURE,
-} = createModule('myClient', { /* ... */ }, {})
+} = moducks.createModule('myClient', { /* ... */ }, {})
 ```
 
-*cf. [API Reference - `createModule(moduleName, definitions, defaultState = {}, options = {})` - ReturnValue](../api#return-value)*
+*cf. [API Reference - `<instance>.createModule(moduleName, definitions, initialState = {}, options = {})` - ReturnValue](../api#return-value)*
 
 The FORK effect from additional generator function `worker()` is also accessible as `sagas.worker`.
 
 ## Define `configureStore()`
 
 ```js
+import * as effects from 'redux-saga/effects'
+import Moducks from 'moducks'
+
+export default new Moducks({ effects, appName: 'myApp' })
+```
+
+```js
 import { applyMiddleware, combineReducers, createStore } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import { all } from 'redux-saga/effects'
-import { flattenSagas } from 'moducks'
+import moducks from './path/to/moducks'
 
-function configureStore(reducers, sagas) {
+const configureStore = (reducers, sagas) => {
 
   const sagaMiddleware = createSagaMiddleware()
 
@@ -101,28 +78,31 @@ function configureStore(reducers, sagas) {
     ...store,
     runSaga: () => sagaMiddleware.run(function* () {
       // run all sagas!
-      yield all(flattenSagas(sagas))
+      yield all(moducks.util.flattenSagas(sagas))
     }),
   }
 }
+
+export default configureStore
 ```
 
-*cf. [API Reference - `flattenSagas(...sagas)`](../api#flattensagassagas)*
+*cf. [API Reference - `<instance>.util.flattenSagas(...sagas)`](../api#instanceutilflattensagassagas)*
 
-## Testing with `retrieveWorkers()`
+## Testing with `<instance>.util.retrieveWorkers()`
 
 The exported object `sagas` values are FORK effects rather than raw generator functions.  
-You can use [`retrieveWorkers() or retrieveWorker()`](../api#retrieveworkerssagas-retrieveworkersaga) to retrieve the latter.
+You can use [`<instance>.util.retrieveWorkers() or <instance>.util.retrieveWorker()`](../api#instanceutilretrieveworkerssagasinstanceutilretrieveworkersaga) to retrieve the latter.
 
 ```js
 import test from 'tape'
 import { call, put } from 'redux-saga/effects'
 import { sagas, load, loadSuccess } from './myModule'
 import callApiAsync from '../api'
+import moducks from './path/to/moducks'
 
 test('Test sagas', assert => {
 
-  const workers = retrieveWorkers(sagas)
+  const workers = moducks.util.retrieveWorkers(sagas)
 
   const iterator = workers.load(load(/* API params */))
   let current

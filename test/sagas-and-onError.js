@@ -1,10 +1,12 @@
 import test from 'tape'
 import { applyMiddleware, createStore } from 'redux'
 import createSagaMiddleware, { delay, END } from 'redux-saga'
-import { all, call, fork, race, spawn, take, takeEvery } from 'redux-saga/effects'
-import { createModule, flattenSagas, retrieveWorkers } from '../src'
+import * as effects from 'redux-saga/effects'
+import Moducks from '../src'
 
-function configureStore(reducer, sagas) {
+const moducks = new Moducks({ effects })
+
+const configureStore = (reducer, sagas) => {
 
   const sagaMiddleware = createSagaMiddleware()
 
@@ -15,13 +17,16 @@ function configureStore(reducer, sagas) {
 
   return {
     ...store,
-    runSaga: () => sagaMiddleware.run(function* () {
-      yield all(flattenSagas(sagas))
-    }).done,
+    runSaga: () => {
+      const task = sagaMiddleware.run(function* () {
+        yield effects.all(moducks.util.flattenSagas(sagas))
+      })
+      return task.done || task.toPromise()
+    },
   }
 }
 
-async function callApiAsync(payload) {
+const callApiAsync = async payload => {
 
   await delay(1)
 
@@ -36,11 +41,11 @@ test('[Sagas and onError] it should automatically wrapped by enhanced takeEvery'
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
     REQUEST: {
       saga: function* (action) {
         events.push(`run request: ${action.payload}`)
-        const response = yield call(callApiAsync, action.payload)
+        const response = yield effects.call(callApiAsync, action.payload)
         events.push(`receive response: ${response}`)
         return requestSuccess(response)
       },
@@ -86,11 +91,11 @@ test('[Sagas and onError] it should work with enhanced takeEvery', assert => {
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
     REQUEST: {
       saga: ({ type, takeEvery }) => takeEvery(type, function* (action) {
         events.push(`run request: ${action.payload}`)
-        const response = yield call(callApiAsync, action.payload)
+        const response = yield effects.call(callApiAsync, action.payload)
         events.push(`receive response: ${response}`)
         return requestSuccess(response)
       }),
@@ -136,14 +141,14 @@ test('[Sagas and onError] it should work with enhanced fork', assert => {
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
     REQUEST: {
       saga: ({ type, fork }) => function* () {
         while (true) { // eslint-disable-line no-constant-condition
-          const action = yield take(type)
+          const action = yield effects.take(type)
           yield fork(function* () {
             events.push(`run request: ${action.payload}`)
-            const response = yield call(callApiAsync, action.payload)
+            const response = yield effects.call(callApiAsync, action.payload)
             events.push(`receive response: ${response}`)
             return requestSuccess(response)
           }, action)
@@ -191,14 +196,14 @@ test('[Sagas and onError] it should work with manually enhanced generator', asse
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
     REQUEST: {
       saga: ({ type, enhance }) => function* () {
         while (true) { // eslint-disable-line no-constant-condition
-          const action = yield take(type)
-          yield fork(enhance(function* () {
+          const action = yield effects.take(type)
+          yield effects.fork(enhance(function* () {
             events.push(`run request: ${action.payload}`)
-            const response = yield call(callApiAsync, action.payload)
+            const response = yield effects.call(callApiAsync, action.payload)
             events.push(`receive response: ${response}`)
             return requestSuccess(response)
           }), action)
@@ -250,20 +255,20 @@ test('[Sagas and onError] it should work with additional sagas', assert => {
     timer, sagas,
     start, stop, tick, finish,
     START, STOP, TICK,
-  } = createModule('timer', {
+  } = moducks.createModule('timer', {
 
     START: {},
     STOP: {},
     TICK: {},
-    FINISH: (state, action) => events.push('finish loop'),
+    FINISH: () => events.push('finish loop'),
 
   }, {}, {
 
     sagas: {
       worker: function* () {
-        const action = yield take(START)
+        yield effects.take(START)
         events.push('start loop')
-        while ((yield race({ tick: take(TICK), stop: take(STOP) })).tick) {
+        while ((yield effects.race({ tick: effects.take(TICK), stop: effects.take(STOP) })).tick) {
           events.push('looping')
         }
         return finish()
@@ -297,16 +302,16 @@ test('[Sagas and onError] it should recover from errors', assert => {
   assert.plan(1)
 
   const events = []
-  const { myClient, sagas, requestSuccess, requestFailure } = createModule('myClient', {
+  const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule('myClient', {
     REQUEST: {
       saga: function* (action) {
         let response
         try {
           events.push(`run request: ${action.payload}`)
-          response = yield call(callApiAsync, action.payload)
+          response = yield effects.call(callApiAsync, action.payload)
         } catch (e) {
           events.push(`retry run request: ${action.payload}`)
-          response = yield call(callApiAsync, action.payload)
+          response = yield effects.call(callApiAsync, action.payload)
         }
         events.push(`receive response: ${response}`)
         return requestSuccess(response)
@@ -344,4 +349,89 @@ test('[Sagas and onError] it should recover from errors', assert => {
   store.dispatch({ type: 'myClient/REQUEST', payload: 'foo1' })
   store.dispatch({ type: 'myClient/REQUEST', payload: 'bar2' })
   store.dispatch(END)
+})
+
+
+test('[Reducer] it handles module with namespace', assert => {
+
+  const moducks = new Moducks({ effects })
+
+  const { sagas } = moducks.createModule('my/awesomeModule', {
+    FOO_ACTION: {
+      saga: function* () {},
+    },
+    '*otherModule/BAR_ACTION': {
+      saga: function* () {},
+    },
+    '**BAZ_ACTION': {
+      saga: function* () {},
+    },
+    '@@ExternalApp/someModule/QUX_ACTION': {
+      saga: function* () {},
+    },
+    '!QUUX_ACTION': {
+      saga: function* () {},
+    },
+    '!*otherModule/CORGE_ACTION': {
+      saga: function* () {},
+    },
+    '!**GRAULT_ACTION': {
+      saga: function* () {},
+    },
+    '!@@ExternalApp/someModule/GARPLY_ACTION': {
+      saga: function* () {},
+    },
+  })
+
+  assert.ok(sagas.fooAction)
+  assert.ok(sagas.barAction)
+  assert.ok(sagas.bazAction)
+  assert.ok(sagas.quxAction)
+  assert.ok(sagas.quuxAction)
+  assert.ok(sagas['otherModule/CORGE_ACTION'])
+  assert.ok(sagas.GRAULT_ACTION)
+  assert.ok(sagas['@@ExternalApp/someModule/GARPLY_ACTION'])
+  assert.end()
+})
+
+test('[Creator] it handles module with application and namespace', assert => {
+
+  const moducks = new Moducks({ effects, appName: 'myApp' })
+
+  const { sagas } = moducks.createModule('my/awesomeModule', {
+    FOO_ACTION: {
+      saga: function* () {},
+    },
+    '*otherModule/BAR_ACTION': {
+      saga: function* () {},
+    },
+    '**BAZ_ACTION': {
+      saga: function* () {},
+    },
+    '@@ExternalApp/someModule/QUX_ACTION': {
+      saga: function* () {},
+    },
+    '!QUUX_ACTION': {
+      saga: function* () {},
+    },
+    '!*otherModule/CORGE_ACTION': {
+      saga: function* () {},
+    },
+    '!**GRAULT_ACTION': {
+      saga: function* () {},
+    },
+    '!@@ExternalApp/someModule/GARPLY_ACTION': {
+      saga: function* () {},
+    },
+  })
+
+  assert.ok(sagas.fooAction)
+  assert.ok(sagas.barAction)
+  assert.ok(sagas.bazAction)
+  assert.ok(sagas.quxAction)
+  assert.ok(sagas.quuxAction)
+  assert.ok(sagas['@@myApp/otherModule/CORGE_ACTION'])
+  assert.ok(sagas.GRAULT_ACTION)
+  assert.ok(sagas['@@ExternalApp/someModule/GARPLY_ACTION'])
+  assert.end()
 })

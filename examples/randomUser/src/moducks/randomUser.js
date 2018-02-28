@@ -1,8 +1,8 @@
-import { createModule } from '../../../../es'
 import { call } from 'redux-saga/effects'
 import { delay } from 'redux-saga'
+import moducks from './moducks'
 
-const defaultState = {
+const initialState = {
   users: [],
   errors: [],
   pendingCounts: 0,
@@ -32,7 +32,7 @@ export const fetchRandomUser = async () => {
 export const {
   randomUser, sagas,
   load, loadSuccess, loadFailure, clear,
-} = createModule('randomUser', {
+} = moducks.createModule('randomUser', {
 
   LOAD: {
     reducer: state => ({
@@ -63,4 +63,4 @@ export const {
     errors: [],
   }),
 
-}, defaultState)
+}, initialState)

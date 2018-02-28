@@ -57,23 +57,23 @@ Without moducks, you have to define lengthy definitions for each module.
 import { call, put, takeEvery } from 'redux-saga/effects'
 import { fetchRandomUser } from '../api'
 
-const LOAD = 'randomUser/LOAD'
-const LOAD_SUCCESS = 'randomUser/LOAD_SUCCESS'
-const LOAD_FAILURE = 'randomUser/LOAD_FAILURE'
-const CLEAR = 'randomUser/CLEAR'
+const LOAD = '@@myApp/randomUser/LOAD'
+const LOAD_SUCCESS = '@@myApp/randomUser/LOAD_SUCCESS'
+const LOAD_FAILURE = '@@myApp/randomUser/LOAD_FAILURE'
+const CLEAR = '@@myApp/randomUser/CLEAR'
 
 export const load = () => ({ type: LOAD })
 const loadSuccess = data => ({ type: LOAD_SUCCESS, payload: data })
 const loadFailure = error => ({ type: LOAD_FAILURE, payload: error, error: true })
 export const clear = () => ({ type: CLEAR })
 
-const defaultState = {
+const initialState = {
   users: [],
   errors: [],
   pendingCounts: 0,
 }
 
-export default (state = defaultState, { type, payload }) => {
+export default (state = initialState, { type, payload }) => {
   switch (type) {
 
     case LOAD:
@@ -124,11 +124,13 @@ export const sagas = {
 With moducks, module definition will be extremely simple. The following snippet is equivalent to the above.
 
 ```javascript
-import { createModule } from 'moducks'
-import { call } from 'redux-saga/effects'
+import Moducks from 'moducks'
+import * as effects from 'redux-saga/effects'
 import { fetchRandomUser } from '../api'
 
-const defaultState = {
+const moducks = new Moducks({ effects, appName: 'myApp' })
+
+const initialState = {
   users: [],
   errors: [],
   pendingCounts: 0,
@@ -137,7 +139,7 @@ const defaultState = {
 const {
   randomUser, sagas,
   load, loadSuccess, loadFailure, clear,
-} = createModule('randomUser', {
+} = moducks.createModule('randomUser', {
 
   LOAD: {
     reducer: state => ({
@@ -145,7 +147,7 @@ const {
       pendingCounts: state.pendingCounts + 1,
     }),
     saga: function* (action) {
-      return loadSuccess(yield call(fetchRandomUser))
+      return loadSuccess(yield effects.call(fetchRandomUser))
     },
     onError: (e, action) => loadFailure(e),
   },
@@ -168,7 +170,7 @@ const {
     errors: [],
   }),
 
-}, defaultState)
+}, initialState)
 
 export default randomUser
 export { sagas, load, clear }

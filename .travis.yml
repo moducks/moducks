@@ -1,5 +1,15 @@
 language: node_js
+
 node_js:
-  - "node"
+  - node
+
+env:
+  - REDUX_SAGA_VERSION=0.15.6
+  - REDUX_SAGA_VERSION=0.16.0
+  - REDUX_SAGA_VERSION=1.0.0-beta.0
+
+before_script:
+  - npm install --save-dev redux-saga@${REDUX_SAGA_VERSION}
+
 script:
   - npm test
