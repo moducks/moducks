@@ -142,7 +142,7 @@ const { myClient, sagas, requestSuccess, requestFailure, requestCancel } = moduc
   // use enhanced takeEvery automatically
   REQUEST: {
     saga: function* (action) {
-      const { cancelTokenSource } = yield selectModule.effect()
+      const { cancelTokenSource } = yield select(({ myClient }) => myClient)
       if (cancelTokenSource) {
         yield requestCancel(cancelTokenSource)
       }
@@ -164,7 +164,7 @@ const { myClient, sagas, requestSuccess, requestFailure, requestCancel } = moduc
   // use enhanced takeEvery manually
   REQUEST: {
     saga: ({ type, takeEvery }) => takeEvery(type, function* (action) {
-      const { cancelTokenSource } = yield selectModule.effect()
+      const { cancelTokenSource } = yield select(({ myClient }) => myClient)
       if (cancelTokenSource) {
         yield requestCancel(cancelTokenSource)
       }
@@ -190,7 +190,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule
       while (true) {
         const action = yield take(type)
         yield fork(function* () {
-          const { cancelTokenSource } = yield selectModule.effect()
+          const { cancelTokenSource } = yield select(({ myClient }) => myClient)
           if (cancelTokenSource) {
             yield requestCancel(cancelTokenSource)
           }
@@ -218,7 +218,7 @@ const { myClient, sagas, requestSuccess, requestFailure } = moducks.createModule
       while (true) {
         const action = yield take(type)
         yield fork(enhance(function* () {
-          const { cancelTokenSource } = yield selectModule.effect()
+          const { cancelTokenSource } = yield select(({ myClient }) => myClient)
           if (cancelTokenSource) {
             yield requestCancel(cancelTokenSource)
           }
