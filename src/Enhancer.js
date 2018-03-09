@@ -9,7 +9,17 @@ export default class Enhancer {
     spawn: onError => (fn, ...args) => this.effects.spawn(this.enhance(fn, onError), ...args),
   }
 
-  enhance = (saga, onError) => {
+  constructor(Util, effects) {
+    this.util = Util
+    this.effects = effects
+    this.enhancedForkers = this.util.mapValues(this.enhancibleForkerThunks, thunk => thunk(null))
+  }
+
+  has(effectName) {
+    return this.util.isFunction(this.effects[effectName])
+  }
+
+  enhance(saga, onError) {
     const self = this
     return function* enhancedSaga(...args) {
       try {
@@ -19,14 +29,6 @@ export default class Enhancer {
         yield* self.processFunction(onError, e, ...args)
       }
     }
-  }
-
-  has = effectName => this.util.isFunction(this.effects[effectName])
-
-  constructor(Util, effects) {
-    this.util = Util
-    this.effects = effects
-    this.enhancedForkers = this.util.mapValues(this.enhancibleForkerThunks, thunk => thunk(null))
   }
 
   *putYields(g) {

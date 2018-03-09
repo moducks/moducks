@@ -12,7 +12,7 @@ export default class Moducks {
     this.enhancer = new Enhancer(this.util, this.config.effects)
   }
 
-  extractIOSymbol = () => {
+  extractIOSymbol() {
     const task = this.config.effects.fork(function* () {})
     if (typeof task === 'object' && task !== null) {
       const string = '@@redux-saga/IO'
@@ -23,21 +23,27 @@ export default class Moducks {
     throw new Error('Cannot find symbol: @@redux-saga/IO')
   }
 
-  thunkifyMainGeneratorFunction = saga => ({ type, [this.config.defaultEffect]: defaultEffect }) => defaultEffect(type, saga)
-  thunkifyAdditionalGeneratorFunction = saga => ({ fork }) => fork(saga)
+  thunkifyMainGeneratorFunction(saga) {
+    return ({ type, [this.config.defaultEffect]: defaultEffect }) => defaultEffect(type, saga)
+  }
 
-  initializeMainSaga = (saga, type, onError) => {
+  thunkifyAdditionalGeneratorFunction(saga) {
+    return ({ fork }) => fork(saga)
+  }
+
+  initializeMainSaga(saga, type, onError) {
     const errLabels = [`Invalid saga for ${type}`, this.config.defaultEffect]
     return this.initializeSaga(this.thunkifyMainGeneratorFunction, saga, errLabels, { type }, onError)
   }
-  initializeAdditionalSaga = (saga, actions, sagaName) => {
+
+  initializeAdditionalSaga(saga, actions, sagaName) {
     const errLabels = [`Invalid additional saga ${sagaName}`, 'fork']
     return this.initializeSaga(this.thunkifyAdditionalGeneratorFunction, saga, errLabels, actions)
   }
 
-  initializeSaga = (thunkify, saga, errLabels, actions, onError) => {
+  initializeSaga(thunkify, saga, errLabels, actions, onError) {
     if (typeof saga === 'function') {
-      saga = (this.util.isGeneratorFunction(saga) ? thunkify(saga) : saga)({
+      saga = (this.util.isGeneratorFunction(saga) ? thunkify.call(this, saga) : saga)({
         ...actions,
         ...this.util.mapKeyValues(this.enhancer.enhancibleForkerThunks, ([name, thunk]) => this.enhancer.has(name) ? { [name]: thunk(onError) } : null),
         enhance: saga => this.enhancer.enhance(saga, onError),
@@ -54,7 +60,7 @@ export default class Moducks {
     )
   }
 
-  createModule = (moduleName, definitions, initialState = {}, options = {}) => {
+  createModule(moduleName, definitions, initialState = {}, options = {}) {
     const reducerMap = {}
     const actions = {}
     const actionCreators = {}

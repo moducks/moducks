@@ -12,7 +12,7 @@
 ### Installing
 
 ```Bash
-npm install moducks@1.0.0-beta.0 --save
+npm install moducks@1.0.0-beta.1 --save
 ```
 
 ### Contents
