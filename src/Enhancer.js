@@ -12,11 +12,15 @@ export default class Enhancer {
   constructor(Util, effects) {
     this.util = Util
     this.effects = effects
-    this.enhancedForkers = this.util.mapValues(this.enhancibleForkerThunks, thunk => thunk(null))
+    this.enhancedForkers = this.createEnhancedForkers(null)
   }
 
   has(effectName) {
     return this.util.isFunction(this.effects[effectName])
+  }
+
+  createEnhancedForkers(onError) {
+    return this.util.mapKeyValues(this.enhancibleForkerThunks, ([name, thunk]) => this.has(name) ? { [name]: thunk(onError) } : null)
   }
 
   enhance(saga, onError) {
@@ -66,4 +70,3 @@ export default class Enhancer {
     )
   }
 }
-

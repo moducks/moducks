@@ -13,6 +13,7 @@
 * [`<instance>.util.retrieveWorkers(sagas)`<br>`<instance>.util.retrieveWorker(saga)`](#instanceutilretrieveworkerssagasinstanceutilretrieveworkersaga)
 * [`<instance>.enhancer.enhance(saga, onError)`](#instanceenhancerenhancesaga-onerror)
 * [`<instance>.enhancer.enhancibleForkerThunks.*(onError)(...args)`<br>`<instance>.enhancer.enhancedForkers.*(...args)`](#instanceenhancerenhancibleforkerthunksonerrorargsinstanceenhancerenhancedforkersargs)
+* [`<instance>.enhancer.createEnhancedForkers(onError)`](#instanceenhancercreateenhancedforkersonerror)
 
 ## `new Moducks(config)`
 
@@ -514,4 +515,13 @@ return takeEvery(type, function* (action) {
     yield put(actionOnError(e, action))
   }
 })
+```
+
+## `<instance>.enhancer.createEnhancedForkers(onError)`
+
+Decorate all `<instance>.enhancer.enhancibleForkerThunks` with specific `onError`.
+
+```js
+const onError = (e, action) => actionOnError(e, action)
+const { takeEvery, takeLeading, takeLatest, throttle, fork, spawn } = moducks.enhancer.createEnhancedForkers(onError)
 ```

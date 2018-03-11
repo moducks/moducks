@@ -42,13 +42,11 @@ export default class Moducks {
   }
 
   initializeSaga(thunkify, saga, errLabels, actions, onError) {
-    if (typeof saga === 'function') {
-      saga = (this.util.isGeneratorFunction(saga) ? thunkify.call(this, saga) : saga)({
-        ...actions,
-        ...this.util.mapKeyValues(this.enhancer.enhancibleForkerThunks, ([name, thunk]) => this.enhancer.has(name) ? { [name]: thunk(onError) } : null),
-        enhance: saga => this.enhancer.enhance(saga, onError),
-      })
-    }
+    if (typeof saga === 'function') saga = (this.util.isGeneratorFunction(saga) ? thunkify.call(this, saga) : saga)({
+      ...actions,
+      ...this.enhancer.createEnhancedForkers(onError),
+      enhance: saga => this.enhancer.enhance(saga, onError),
+    })
     if (this.util.isGeneratorFunction(saga)) return this.enhancer.enhancedForkers.fork(saga)
     if (this.util.isForkEffect(saga)) return saga
     throw new Error(
