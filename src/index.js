@@ -1,5 +1,5 @@
 import { createAction, handleActions } from 'redux-actions'
-import camelCase from 'redux-actions/lib/camelCase'
+import camelCase from 'redux-actions/lib/utils/camelCase'
 import schema from './schema'
 import Enhancer from './Enhancer'
 import Util from './Util'
