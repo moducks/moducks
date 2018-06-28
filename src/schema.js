@@ -8,7 +8,7 @@ const effects = yup
   .transform((currentValue, originalValue) =>
     // in webpack v4, wildcard import type is not "Object" but "Module"
     originalValue && originalValue[Symbol.toStringTag] === 'Module'
-      ? Object.create(null, originalValue)
+      ? { ...originalValue }
       : currentValue
   )
   .required()
