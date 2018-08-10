@@ -17,7 +17,7 @@ export default class Moducks {
     if (typeof task === 'object' && task !== null) {
       const string = '@@redux-saga/IO'
       if (task[string]) return string
-      const symbol = Object.getOwnPropertySymbols(task).find(symbol => symbol.toString() === 'Symbol(@@redux-saga/IO)')
+      const symbol = Object.getOwnPropertySymbols(task).find(symbol => symbol.toString().startsWith('Symbol(@@redux-saga/IO)'))
       if (task[symbol]) return symbol
     }
     throw new Error('Cannot find symbol: @@redux-saga/IO')
