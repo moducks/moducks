@@ -1,5 +1,5 @@
 import test from 'tape'
-import { ActionTypes } from 'redux/lib/createStore'
+import { __DO_NOT_USE__ActionTypes as ActionTypes } from 'redux'
 import * as effects from 'redux-saga/effects'
 import Moducks from '../src'
 

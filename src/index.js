@@ -8,19 +8,8 @@ export default class Moducks {
 
   constructor(config) {
     this.config = schema.validateSync(config)
-    this.util = new Util(this.extractIOSymbol())
+    this.util = new Util()
     this.enhancer = new Enhancer(this.util, this.config.effects)
-  }
-
-  extractIOSymbol() {
-    const task = this.config.effects.fork(function* () {})
-    if (typeof task === 'object' && task !== null) {
-      const string = '@@redux-saga/IO'
-      if (task[string]) return string
-      const symbol = Object.getOwnPropertySymbols(task).find(symbol => symbol.toString().startsWith('Symbol(@@redux-saga/IO)'))
-      if (task[symbol]) return symbol
-    }
-    throw new Error('Cannot find symbol: @@redux-saga/IO')
   }
 
   thunkifyMainGeneratorFunction(saga) {
@@ -49,6 +38,7 @@ export default class Moducks {
     })
     if (this.util.isGeneratorFunction(saga)) return this.enhancer.enhancedForkers.fork(saga)
     if (this.util.isForkEffect(saga)) return saga
+    console.log(saga)
     throw new Error(
       `${errLabels[0]}: It must be specified as one of them: \n` +
       `  - generator function (=> automatically invoked by enhanced ${errLabels[1]}())\n` +

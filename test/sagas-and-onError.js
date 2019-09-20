@@ -1,6 +1,6 @@
 import test from 'tape'
 import { applyMiddleware, createStore } from 'redux'
-import createSagaMiddleware, { delay, END } from 'redux-saga'
+import createSagaMiddleware, { END } from 'redux-saga'
 import * as effects from 'redux-saga/effects'
 import Moducks from '../src'
 
@@ -28,7 +28,7 @@ const configureStore = (reducer, sagas) => {
 
 const callApiAsync = async payload => {
 
-  await delay(1)
+  await effects.delay(1)
 
   if (payload.includes('foo')) {
     return `Success_${payload}`

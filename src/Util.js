@@ -1,9 +1,5 @@
 export default class Util {
 
-  constructor(IO) {
-    this.IO = IO
-  }
-
   basename(fullname) {
     return fullname.replace(/^[\s\S]*\/(?=[^/]*$)/, '')
   }
@@ -35,18 +31,18 @@ export default class Util {
   }
 
   isEffect(obj) {
-    return this.isObject(obj) && obj[this.IO]
+    return this.isObject(obj) && obj['@@redux-saga/IO']
   }
 
   isForkEffect(obj) {
-    return this.isEffect(obj) && this.isObject(obj.FORK) && this.isFunction(obj.FORK.fn) && Array.isArray(obj.FORK.args)
+    return this.isEffect(obj) && obj.type === 'FORK' && this.isObject(obj.payload) && this.isFunction(obj.payload.fn) && Array.isArray(obj.payload.args)
   }
 
   retrieveWorker(saga) {
     if (!this.isForkEffect(saga)) {
       throw new Error('Invalid saga: The value must be a redux-saga FORK effect.')
     }
-    for (const arg of [saga.FORK.fn, ...saga.FORK.args]) {
+    for (const arg of [saga.payload.fn, ...saga.payload.args]) {
       if (this.isGeneratorFunction(arg)) return arg
     }
     throw new Error('Invalid saga: Generator function not found.')
@@ -61,7 +57,7 @@ export default class Util {
     while (sagas.length) {
       const saga = sagas.shift()
       if (!this.isObject(saga)) continue
-      if (saga[this.IO]) storage.push(saga)
+      if (saga['@@redux-saga/IO']) storage.push(saga)
       sagas.unshift(...Object.values(saga))
     }
     return storage
