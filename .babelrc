@@ -1,14 +1,14 @@
 {
   "env": {
     "cjs": {
-      "presets": [["@babel/preset-env"]],
+      "presets": ["@babel/preset-env", "@babel/preset-typescript"],
       "plugins": [
         ["@babel/plugin-transform-runtime", { "corejs": 2 }],
         "@babel/plugin-proposal-class-properties"
       ]
     },
     "es": {
-      "presets": [["@babel/preset-env", { "modules": false }]],
+      "presets": ["@babel/preset-env", "@babel/preset-typescript"],
       "plugins": [
         ["@babel/plugin-transform-runtime", { "corejs": 2 }],
         "@babel/plugin-proposal-class-properties"
