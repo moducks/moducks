@@ -1,23 +1,7 @@
 import { isAction, isEffect, isGeneratorFunction } from './helpers';
-import { Action } from 'redux';
-import { PutEffect } from 'redux-saga/effects';
-import { SagaIterator as BaseSagaIterator } from 'redux-saga';
+import { PutFunction, IterableSagaIterator, Saga } from '../types';
 
-export type PutEffectCreator = <A extends Action>(action: A) => PutEffect<A>;
-export type SagaIterator = BaseSagaIterator & Generator
-
-export default function* processFunction<F extends (...args: any) => unknown>(
-  put: PutEffectCreator,
-  fn: F,
-  ...args: Parameters<F>[]
-): SagaIterator {
-  yield* putReturn(
-    put,
-    isGeneratorFunction(fn) ? yield* putYields(put, fn(...args)) : fn(...args)
-  );
-}
-
-function* putReturn(put: PutEffectCreator, value: unknown): SagaIterator {
+function* putReturn(put: PutFunction, value: unknown): IterableSagaIterator {
   if (isEffect(value)) {
     yield value;
   } else if (isAction(value)) {
@@ -25,7 +9,7 @@ function* putReturn(put: PutEffectCreator, value: unknown): SagaIterator {
   }
 }
 
-function* putYields(put: PutEffectCreator, g: Generator): SagaIterator {
+function* putYields(put: PutFunction, g: Generator): IterableSagaIterator {
   let value, done;
   try {
     ({ value, done } = g.next());
@@ -46,4 +30,13 @@ function* putYields(put: PutEffectCreator, g: Generator): SagaIterator {
     }
   }
   return value;
+}
+
+export default function* processFunction<
+  F extends Saga | ((...args: any[]) => any)
+>(put: PutFunction, fn: F, ...args: Parameters<F>[]): IterableSagaIterator {
+  yield* putReturn(
+    put,
+    isGeneratorFunction(fn) ? yield* putYields(put, fn(...args)) : fn(...args)
+  );
 }

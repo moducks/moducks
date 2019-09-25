@@ -39,6 +39,7 @@
   "homepage": "https://github.com/moducks/moducks#readme",
   "dependencies": {
     "redux-actions": "^2.6.5",
+    "to-camel-case": "^1.0.0",
     "yup": "^0.27.0"
   },
   "devDependencies": {
@@ -50,6 +51,9 @@
     "@babel/preset-env": "^7.6.0",
     "@babel/preset-typescript": "^7.6.0",
     "@babel/runtime-corejs2": "^7.6.0",
+    "@types/redux-actions": "^2.6.1",
+    "@types/to-camel-case": "^1.0.0",
+    "@types/yup": "^0.26.24",
     "@typescript-eslint/eslint-plugin": "^2.3.0",
     "@typescript-eslint/parser": "^2.3.0",
     "cross-env": "^6.0.0",

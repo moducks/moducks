@@ -1,2 +1,2 @@
-export const basename = (fullname: string): string =>
+export const basename = (fullname: string) =>
   fullname.replace(/^[\s\S]*\/(?=[^/]*$)/, '');
