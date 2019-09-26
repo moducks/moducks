@@ -1,107 +1,190 @@
 import { createAction, handleActions } from 'redux-actions';
 import camelCase from 'to-camel-case';
 import schema from './schema';
-import { isFunction, mapKeyValues } from './internal/helpers';
+import { isFunction, mapKeyValues, basename } from './internal/helpers';
 import processFunction from './internal/processFunction';
 import {
-  IterableSagaIterator,
+  EnhanceFunction,
   ModucksConfig,
-  Saga,
   OnError,
-  ThrottleFunction
+  StrictGeneratorFunction,
+  GeneratorFunctionYieldType,
 } from './types';
-import { MappedObject } from './internal/helpers/object';
-import { Pattern } from 'redux-saga/effects';
+import { ForkEffect, ActionPattern } from 'redux-saga/effects';
+import { Action } from 'redux';
+import {MappedObject} from './internal/helpers/object';
 
 export default class Moducks {
-  private config: ModucksConfig;
+  public readonly config: ModucksConfig;
 
-  public enhancibleForkerThunks = {
-    fork: <S extends Saga>(onError: OnError) => (
-      fn: S,
-      ...args: Parameters<S>[]
-    ) => this.config.effects.fork(this.enhance(fn, onError), ...args),
+  public readonly enhancibleForkerThunks = {
+    fork: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      R extends ForkEffect<GeneratorFunctionYieldType<EnhanceFunction<F>>>
+    >(
+      fn: F,
+      ...args: Parameters<F>
+    ): R => this.config.effects.fork(this.enhance(fn, onError), ...args) as R,
 
-    spawn: <S extends Saga>(onError: OnError) => (
-      fn: S,
-      ...args: Parameters<S>[]
-    ) => this.config.effects.spawn!(this.enhance(fn, onError), ...args),
+    spawn: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      R extends ForkEffect<GeneratorFunctionYieldType<EnhanceFunction<F>>>
+    >(
+      fn: F,
+      ...args: Parameters<F>
+    ): R => {
+      if (!this.config.effects.spawn) {
+        throw new Error('spawn effect is not available');
+      }
+      return this.config.effects.spawn(this.enhance(fn, onError), ...args) as R;
+    },
 
-    throttle: <S extends Saga, P extends Parameters<ThrottleFunction>>(
-      onError: OnError
-    ) => (ms: P[0], patternOrChannel: P[1], worker: P[2], ...args: any[]) =>
-      this.config.effects.throttle!(
+    throttle: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      A extends ActionPattern | Action
+    >(
+      ms: number,
+      patternOrChannel: A,
+      worker: F,
+      ...args: any[]
+    ) => {
+      if (!this.config.effects.throttle) {
+        throw new Error('throttle effect is not available');
+      }
+      return this.config.effects.throttle(
         ms,
-        patternOrChannel,
+        patternOrChannel as (Extract<A, ActionPattern> & Extract<A, Action>),
         this.enhance(worker, onError),
         ...args
-      ),
+      );
+    },
 
-    debounce: onError => (ms, pattern, worker, ...args) =>
-      this.config.effects.debounce!(ms, pattern, worker, ...args),
-
-    takeEvery: onError => (patternOrChannel, worker, ...args) =>
-      this.config.effects.takeEvery!(
-        patternOrChannel,
+    debounce: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      A extends ActionPattern | Action
+    >(
+      ms: number,
+      patternOrChannel: A,
+      worker: F,
+      ...args: any[]
+    ) => {
+      if (!this.config.effects.debounce) {
+        throw new Error('debounce effect is not available');
+      }
+      return this.config.effects.debounce(
+        ms,
+        patternOrChannel as (Extract<A, ActionPattern> & Extract<A, Action>),
         this.enhance(worker, onError),
         ...args
-      ),
+      );
+    },
 
-    takeLeading: onError => (patternOrChannel, worker, ...args) =>
-      this.config.effects.takeLeading!(
-        patternOrChannel,
+    takeEvery: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      A extends ActionPattern | Action
+    >(
+      patternOrChannel: A,
+      worker: F,
+      ...args: any[]
+    ) => {
+      if (!this.config.effects.takeEvery) {
+        throw new Error('takeEvery effect is not available');
+      }
+      return this.config.effects.takeEvery(
+        patternOrChannel as (Extract<A, ActionPattern> & Extract<A, Action>),
         this.enhance(worker, onError),
         ...args
-      ),
+      );
+    },
 
-    takeLatest: onError => (patternOrChannel, worker, ...args) =>
-      this.config.effects.takeLatest!(
-        patternOrChannel,
+    takeLeading: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      A extends ActionPattern | Action
+    >(
+      patternOrChannel: A,
+      worker: F,
+      ...args: any[]
+    ) => {
+      if (!this.config.effects.takeLeading) {
+        throw new Error('takeLeading effect is not available');
+      }
+      return this.config.effects.takeLeading(
+        patternOrChannel as (Extract<A, ActionPattern> & Extract<A, Action>),
         this.enhance(worker, onError),
         ...args
-      )
+      );
+    },
+
+    takeLatest: (onError?: OnError) => <
+      F extends StrictGeneratorFunction,
+      A extends ActionPattern | Action
+    >(
+      patternOrChannel: A,
+      worker: F,
+      ...args: any[]
+    ) => {
+      if (!this.config.effects.takeLatest) {
+        throw new Error('takeLatest effect is not available');
+      }
+      return this.config.effects.takeLatest(
+        patternOrChannel as (Extract<A, ActionPattern> & Extract<A, Action>),
+        this.enhance(worker, onError),
+        ...args
+      );
+    }
   };
 
-  private enhancedForkers: MappedObject<{
-    takeLeading: (onError) => (patternOrChannel, worker, ...args) => any;
-    throttle: (onError) => (ms, pattern, worker, ...args) => any;
-    fork: (onError) => (fn, ...args) => any;
-    spawn: (onError) => (fn, ...args) => any;
-    takeEvery: (onError) => (patternOrChannel, worker, ...args) => any;
-    takeLatest: (onError) => (patternOrChannel, worker, ...args) => any;
-  }>;
+  private enhancedForkers: {
+    throttle: (onError?: OnError) => <F extends StrictGeneratorFunction,A extends | Action>(ms: number, patternOrChannel: A, worker: F, ...args: any[]) => ForkEffect<never>;
+    debounce: (onError?: OnError) => <F extends StrictGeneratorFunction, A extends | Action>(ms: number, patternOrChannel: A, worker: F, ...args: any[]) => ForkEffect<never>;
+    takeLeading: (onError?: OnError) => <F extends StrictGeneratorFunction, A extends | Action>(patternOrChannel: A, worker: F, ...args: any[]) => ForkEffect<never>;
+    fork: (onError?: OnError) => <F extends StrictGeneratorFunction, R extends ForkEffect<GeneratorFunctionYieldType<EnhanceFunction<F>>>>(fn: F, ...args: Parameters<F>) => R;
+    spawn: (onError?: OnError) => <F extends StrictGeneratorFunction, R extends ForkEffect<GeneratorFunctionYieldType<EnhanceFunction<F>>>>(fn: F, ...args: Parameters<F>) => R;
+    takeEvery: (onError?: OnError) => <F extends StrictGeneratorFunction, A extends | Action>(patternOrChannel: A, worker: F, ...args: any[]) => ForkEffect<never>;
+    takeLatest: (onError?: OnError) => <F extends StrictGeneratorFunction, A extends | Action>(patternOrChannel: A, worker: F, ...args: any[]) => ForkEffect<never>
+  };
 
   constructor(config: ModucksConfig) {
     this.config = schema.validateSync(config) as ModucksConfig;
-    this.enhancedForkers = this.createEnhancedForkers(null);
+    this.enhancedForkers = this.createEnhancedForkers();
   }
 
-  public has(effectName: string) {
-    return isFunction((this.config.effects as any)[effectName]);
+  public has(effectName: keyof ModucksConfig['effects']): boolean {
+    return isFunction(this.config.effects[effectName]);
   }
 
-  public createEnhancedForkers(onError: OnError) {
+  public createEnhancedForkers(onError?: OnError) {
     return mapKeyValues(this.enhancibleForkerThunks, ([name, thunk]) =>
-      this.has(name) ? { [name]: thunk(onError) } : null
+      (this.has(name) ? { [name]: thunk(onError) } : null) as any
     );
   }
 
-  enhance<S extends Saga>(saga: S, onError?: OnError<S>) {
+  public enhance<F extends StrictGeneratorFunction>(
+    saga: F,
+    onError?: OnError<F>
+  ): EnhanceFunction<F> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    return function* enhancedSaga(
-      ...args: Parameters<S>
-    ): IterableSagaIterator {
+    return function* enhancedSaga(...args: Parameters<F>) {
       try {
         yield* processFunction(self.config.effects.put, saga, ...args);
       } catch (e) {
         if (!onError) throw e;
-        yield* processFunction(self.config.effects.put, onError, e, ...args);
+        yield* processFunction(
+          self.config.effects.put,
+          onError,
+          ...([e, ...args] as Parameters<OnError<F>>)
+        );
       }
     };
   }
 
-  createModule(moduleName, definitions, initialState = {}, options = {}) {
+  public createModule(
+    moduleName: string,
+    definitions,
+    initialState = {},
+    options = {}
+  ) {
     const reducerMap = {};
     const actions = {};
     const actionCreators = {};
@@ -113,7 +196,7 @@ export default class Moducks {
       const useFullTypeAsKey = !withModule && /^!/.test(rawType);
 
       const type = rawType.replace(/^!?\*{0,2}/, '');
-      const baseType = this.util.basename(type);
+      const baseType = basename(type);
       const camelBaseType = camelCase(baseType);
       const fullType = `${withApp ? `@@${this.config.appName}/` : ''}${
         withModule ? `${moduleName}/` : ''
@@ -141,23 +224,22 @@ export default class Moducks {
     }
 
     return {
-      [this.util.basename(moduleName)]: handleActions(reducerMap, initialState),
+      [basename(moduleName)]: handleActions(reducerMap, initialState),
       sagas,
       ...actionCreators,
       ...actions
     };
   }
 
-  thunkifyMainGeneratorFunction = saga => {
-    return ({ type, [this.config.defaultEffect]: defaultEffect }) =>
-      defaultEffect(type, saga);
+  private thunkifyMainGeneratorFunction = (saga: StrictGeneratorFunction) => {
+    return ({ type, [this.config.defaultEffect]: defaultEffect }: ModucksConfig['effects'] & ) => defaultEffect(type, saga);
   };
 
-  thunkifyAdditionalGeneratorFunction = saga => {
-    return ({ fork }) => fork(saga);
+  private thunkifyAdditionalGeneratorFunction = (saga: StrictGeneratorFunction) => {
+    return ({ fork }: ModucksConfig['effects']) => fork(saga);
   };
 
-  initializeMainSaga = (saga, type, onError) => {
+  private initializeMainSaga = (saga, type, onError) => {
     const errLabels = [`Invalid saga for ${type}`, this.config.defaultEffect];
     return this.initializeSaga(
       this.thunkifyMainGeneratorFunction,
@@ -168,7 +250,7 @@ export default class Moducks {
     );
   };
 
-  initializeAdditionalSaga(saga, actions, sagaName) {
+  private initializeAdditionalSaga(saga, actions, sagaName) {
     const errLabels = [`Invalid additional saga ${sagaName}`, 'fork'];
     return this.initializeSaga(
       this.thunkifyAdditionalGeneratorFunction,
@@ -178,7 +260,7 @@ export default class Moducks {
     );
   }
 
-  initializeSaga(thunkify, saga, errLabels, actions, onError) {
+  private initializeSaga(thunkify, saga, errLabels, actions, onError) {
     if (typeof saga === 'function')
       saga = (this.util.isGeneratorFunction(saga)
         ? thunkify.call(this, saga)
@@ -190,7 +272,6 @@ export default class Moducks {
     if (this.util.isGeneratorFunction(saga))
       return this.enhancer.enhancedForkers.fork(saga);
     if (this.util.isForkEffect(saga)) return saga;
-    console.log(saga);
     throw new Error(
       `${errLabels[0]}: It must be specified as one of them: \n` +
         `  - generator function (=> automatically invoked by enhanced ${errLabels[1]}())\n` +
@@ -200,3 +281,7 @@ export default class Moducks {
     );
   }
 }
+
+const hoge = (new Moducks()).createEnhancedForkers().fork('aaa', function* () {
+  yield *ffdd;
+});

@@ -1,27 +1,26 @@
 import { IO } from './symbol';
-import { StrictEffect, ForkEffect } from 'redux-saga/effects';
+import { Effect, ForkEffect } from 'redux-saga/effects';
 import { Action } from 'redux';
+import { StrictGenerator, StrictGeneratorFunction } from '../../types';
 
 export const isFunction = (obj: unknown): obj is Function =>
   typeof obj === 'function';
 
-export const isObject = (obj: unknown): obj is Record<string, any> =>
+export const isObject = (obj: unknown): obj is Record<string, unknown> =>
   typeof obj === 'object' && obj !== null;
 
-export const isGenerator = (
-  obj: unknown
-): obj is Generator<unknown, unknown, unknown> =>
+export const isGenerator = (obj: unknown): obj is StrictGenerator =>
   isObject(obj) && isFunction(obj.next) && isFunction(obj.throw);
 
 export const isGeneratorFunction = (
   obj: unknown
-): obj is (...any: any) => Generator<unknown, unknown, unknown> =>
+): obj is StrictGeneratorFunction =>
   isFunction(obj) &&
   (obj.constructor.name === 'GeneratorFunction' ||
     (obj.constructor as any).displayName === 'GeneratorFunction' ||
     isGenerator(obj.constructor.prototype));
 
-export const isEffect = (obj: unknown): obj is StrictEffect =>
+export const isEffect = (obj: unknown): obj is Effect =>
   isObject(obj) &&
   obj[IO] === true &&
   typeof obj.type === 'string' &&

@@ -5,8 +5,9 @@ import {
   isGeneratorFunction
 } from './internal/helpers';
 import { ForkEffect } from 'redux-saga/effects';
+import { SagaContainer, StrictGeneratorFunction } from './types';
 
-export const retrieveWorker = (saga: ForkEffect) => {
+export const retrieveWorker = (saga: ForkEffect): StrictGeneratorFunction => {
   if (!isForkEffect(saga)) {
     throw new Error(
       'Invalid saga: The value must be a redux-saga FORK effect.'
@@ -18,12 +19,12 @@ export const retrieveWorker = (saga: ForkEffect) => {
   throw new Error('Invalid saga: Generator function not found.');
 };
 
-export type SagaContainer = { [key: string]: ForkEffect };
-
-export const retrieveWorkers = (sagas: SagaContainer) =>
+export const retrieveWorkers = (
+  sagas: SagaContainer
+): Record<keyof SagaContainer, StrictGeneratorFunction> =>
   mapValues(sagas, retrieveWorker);
 
-export const flattenSagas = (...sagas: unknown[]) => {
+export const flattenSagas = (...sagas: unknown[]): ForkEffect[] => {
   const storage = [];
   while (sagas.length) {
     const saga = sagas.shift();
