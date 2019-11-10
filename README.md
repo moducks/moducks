@@ -12,7 +12,7 @@
 ### Installing
 
 ```Bash
-npm install moducks --save
+npm install moducks
 ```
 
 ### Contents
