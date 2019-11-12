@@ -5,7 +5,7 @@
     "test": "cross-env BABEL_ENV=cjs babel-node test/index.js | tap-spec"
   },
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.19.0",
     "better-react-spinkit": "^2.0.4",
     "classnames": "^2.2.5",
     "react": "^15.6.2",
